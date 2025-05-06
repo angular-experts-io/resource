@@ -43,5 +43,15 @@
     "prettier": "^3.5.3",
     "typescript": "~5.7.2",
     "typescript-eslint": "8.27.0"
+  },
+  "license": "MIT",
+  "author": "Tomas Trajan <@tomastrajan>",
+  "homepage": "https://github.com/angular-experts-io/resource#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angular-experts-io/resource.git"
+  },
+  "bugs": {
+    "url": "https://github.com/angular-experts-io/resource/issues"
   }
 }
