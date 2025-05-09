@@ -31,6 +31,20 @@ html {
       mobile-height: 64px,
     )
   );
+
+  @include mat.button-overrides(
+    (
+      filled-container-color: map.get(theme.$secondary-palette, 50),
+    )
+  );
+
+  .active {
+    @include mat.button-overrides(
+      (
+        filled-container-color: map.get(theme.$primary-palette, 50),
+      )
+    );
+  }
 }
 
 mat-icon {
