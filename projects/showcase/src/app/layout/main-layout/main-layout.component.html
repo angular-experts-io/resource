@@ -1,4 +1,4 @@
-<div class="flex h-screen flex-col">
+<div class="flex min-h-screen flex-col">
   <mat-toolbar>
     <div class="container mx-auto">
       <div class="flex w-full items-center gap-4">
@@ -14,24 +14,26 @@
             <mat-icon>menu</mat-icon>
           }
         </button>
-        <a href="http://angularexperts.io/blog" target="_blank" class="mr-auto">
+        <a href="http://angularexperts.io/blog" target="_blank">
           <img
             class="h-10"
             src="https://angularexperts.io/assets/images/logo/angular-experts.svg"
             alt="Angular Experts Logo"
           />
         </a>
+        <span class="text-primary-50 mr-auto ml-4 font-bold"
+          ><span class="hidden md:inline">REST</span> RESOURCE</span
+        >
         @for (nav of navigation(); track nav.route) {
           <a
             mat-flat-button
             [routerLink]="nav.route"
-            routerLinkActive="filter brightness-125"
+            routerLinkActive="filter brightness-150"
             class="hidden! md:inline-flex!"
           >
             {{ nav.label }}
           </a>
         }
-        <span class="w-8"></span>
         @for (link of externalLinks(); track link.icon) {
           <a
             mat-icon-button
@@ -49,26 +51,33 @@
   <mat-sidenav-container class="flex-1">
     <mat-sidenav
       mode="push"
-      class="w-48!"
+      class="brigh w-48!"
       [opened]="sidenavOpened()"
       (opened)="sidenavOpened.set(true)"
       (closed)="sidenavOpened.set(false)"
     >
       <div class="flex h-full flex-col gap-2 p-2">
-        @for (nav of navigation(); track nav.route) {
-          <a
-            mat-button
-            [routerLink]="nav.route"
-            routerLinkActive="filter brightness-125"
-          >
-            {{ nav.label }}
-          </a>
-        }
+        <mat-nav-list>
+          @for (nav of navigation(); track nav.route) {
+            <a
+              class="mb-2"
+              mat-list-item
+              [activated]="rla.isActive"
+              [routerLink]="nav.route"
+              routerLinkActive
+              #rla="routerLinkActive"
+            >
+              {{ nav.label }}
+            </a>
+          }
+        </mat-nav-list>
       </div>
     </mat-sidenav>
     <mat-sidenav-content>
-      <div class="container mx-auto">
-        <router-outlet />
+      <div class="my-8 px-4">
+        <div class="container mx-auto">
+          <router-outlet />
+        </div>
       </div>
     </mat-sidenav-content>
   </mat-sidenav-container>

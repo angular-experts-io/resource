@@ -42,7 +42,18 @@ mat-icon {
 [mat-icon-button],
 button {
   mat-icon {
-    position: relative;
-    top: -2px;
+    vertical-align: top;
+    font-size: 20px !important;
+    position: relative !important;
+    top: -2px !important;
   }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--mat-sys-title-large-font);
 }

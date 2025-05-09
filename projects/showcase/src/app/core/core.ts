@@ -1,4 +1,4 @@
-import { provideRouter, Routes } from '@angular/router';
+import { provideRouter, Routes, withComponentInputBinding } from '@angular/router';
 import {
   provideHttpClient,
   withFetch,
@@ -24,7 +24,7 @@ export function provideCore(options: CoreOptions) {
     provideAnimationsAsync(),
     provideExperimentalZonelessChangeDetection(),
     provideHttpClient(withFetch(), withInterceptors([apiInterceptor])),
-    provideRouter(options.routes),
+    provideRouter(options.routes, withComponentInputBinding()),
     provideEnvironmentInitializer(() => {
       const iconRegistry = inject(MatIconRegistry);
       const sanitizer = inject(DomSanitizer);

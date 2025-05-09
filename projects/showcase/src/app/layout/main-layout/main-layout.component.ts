@@ -14,10 +14,11 @@ import {
 } from '@angular/material/sidenav';
 import { MatIcon } from '@angular/material/icon';
 import { MatToolbar } from '@angular/material/toolbar';
-import { MatAnchor, MatIconButton } from '@angular/material/button';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatAnchor, MatIconAnchor, MatIconButton } from '@angular/material/button';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { MatListItem, MatNavList } from '@angular/material/list';
 
 @Component({
   selector: 'showcase-main-layout',
@@ -32,6 +33,9 @@ import { map } from 'rxjs';
     MatSidenav,
     MatSidenavContent,
     MatSidenavContainer,
+    MatNavList,
+    MatListItem,
+    MatIconAnchor,
   ],
   templateUrl: './main-layout.component.html',
   styles: `
@@ -50,8 +54,8 @@ export default class MainLayoutComponent {
       route: 'home',
     },
     {
-      label: 'Other',
-      route: 'other',
+      label: 'Examples',
+      route: 'example',
     },
   ]);
 
