@@ -231,6 +231,12 @@ export type Strategy = 'optimistic' | 'pessimistic';
 
 export interface CrudResourceOptions<T, ID> {
   params?: () => string | undefined;
+
+  // TODO id frontend / backend
+  // single item mode? eg computed item if array is length of 1 else undefined ?
+  // CQRS vs single item return mode ?
+  // return back observable to notify completion (for orchestration)
+
   idSelector?: (item: T) => ID;
   /**
    * The default strategy for the resource for every request type,
