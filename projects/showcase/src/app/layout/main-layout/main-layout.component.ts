@@ -1,5 +1,11 @@
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 
 import {
   MatSidenav,
@@ -9,6 +15,9 @@ import {
 import { MatIcon } from '@angular/material/icon';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatAnchor, MatIconButton } from '@angular/material/button';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'showcase-main-layout',
@@ -33,6 +42,8 @@ import { MatAnchor, MatIconButton } from '@angular/material/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MainLayoutComponent {
+  #breakpointObserver = inject(BreakpointObserver);
+
   navigation = signal([
     {
       label: 'Home',
@@ -55,7 +66,25 @@ export default class MainLayoutComponent {
     },
   ]);
 
-  sidenavOpened = signal(false);
+  isMd = toSignal(
+    this.#breakpointObserver
+      .observe([
+        '(min-width: 768px)', // tailwind md:
+      ])
+      .pipe(map(({ matches }) => matches)),
+    { initialValue: false },
+  );
+
+  sidenavOpened = linkedSignal<boolean, boolean>({
+    source: this.isMd,
+    computation: (isMd, prev) => {
+      if (isMd) {
+        return false;
+      } else {
+        return prev?.value ?? false;
+      }
+    },
+  });
 
   toggleSidenav() {
     this.sidenavOpened.update((prev) => !prev);
