@@ -1,16 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+
+import MainLayoutComponent from './layout/main-layout/main-layout.component';
 
 @Component({
   selector: 'showcase-root',
-  imports: [RouterOutlet],
-  template: `
-    <h1>Welcome to {{ title }}!</h1>
-
-    <router-outlet />
-  `,
-  styles: [],
+  imports: [MainLayoutComponent],
+  template: `<showcase-main-layout />`,
 })
-export default class AppComponent {
-  title = 'showcase';
-}
+export default class AppComponent {}

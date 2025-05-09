@@ -68,8 +68,12 @@
               }
             ],
             "styles": [
-              "projects/showcase/src/styles.scss"
+              "projects/showcase/src/styles.css",
+              "projects/showcase/src/styles-material.scss"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects"]
+            },
             "scripts": []
           },
           "configurations": {

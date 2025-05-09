@@ -1,9 +1,11 @@
 // @ts-check
+const { globalIgnores } = require("eslint/config");
 const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
 
 module.exports = tseslint.config(
+  globalIgnores(["**/jest*.ts"]),
   {
     files: ["**/*.ts"],
     extends: [
@@ -14,6 +16,7 @@ module.exports = tseslint.config(
     ],
     processor: angular.processInlineTemplates,
     rules: {
+      "@typescript-eslint/consistent-type-assertions": "off",
       "@angular-eslint/directive-selector": [
         "error",
         {
@@ -39,5 +42,5 @@ module.exports = tseslint.config(
       ...angular.configs.templateAccessibility,
     ],
     rules: {},
-  }
+  },
 );

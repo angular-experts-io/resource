@@ -1,0 +1,92 @@
+<div class="flex h-screen flex-col">
+  <mat-toolbar>
+    <div class="container mx-auto">
+      <div class="flex w-full items-center gap-4">
+        <button
+          class="md:hidden!"
+          mat-icon-button
+          aria-label="Example icon-button with menu icon"
+          (click)="toggleSidenav()"
+        >
+          @if (sidenavOpened()) {
+            <mat-icon>close</mat-icon>
+          } @else {
+            <mat-icon>menu</mat-icon>
+          }
+        </button>
+        <a href="http://angularexperts.io/blog" target="_blank" class="mr-auto">
+          <img
+            class="h-10"
+            src="https://angularexperts.io/assets/images/logo/angular-experts.svg"
+            alt="Angular Experts Logo"
+          />
+        </a>
+        @for (nav of navigation(); track nav.route) {
+          <a
+            mat-flat-button
+            [routerLink]="nav.route"
+            routerLinkActive="filter brightness-125"
+            class="hidden! md:inline-flex!"
+          >
+            {{ nav.label }}
+          </a>
+        }
+        <span class="w-8"></span>
+        @for (link of externalLinks(); track link.icon) {
+          <a
+            mat-icon-button
+            [href]="link.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="grayscale-100 filter hover:grayscale-0"
+          >
+            <mat-icon [svgIcon]="link.icon"></mat-icon>
+          </a>
+        }
+      </div>
+    </div>
+  </mat-toolbar>
+  <mat-sidenav-container class="flex-1">
+    <mat-sidenav
+      mode="push"
+      class="w-48!"
+      [opened]="sidenavOpened()"
+      (opened)="sidenavOpened.set(true)"
+      (closed)="sidenavOpened.set(false)"
+    >
+      <div class="flex h-full flex-col gap-2 p-2">
+        @for (nav of navigation(); track nav.route) {
+          <a
+            mat-button
+            [routerLink]="nav.route"
+            routerLinkActive="filter brightness-125"
+          >
+            {{ nav.label }}
+          </a>
+        }
+      </div>
+    </mat-sidenav>
+    <mat-sidenav-content>
+      <div class="container mx-auto">
+        <router-outlet />
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+  <footer class="bg-primary-98 mt-auto flex h-16 items-center justify-center">
+    <div class="container mx-auto text-center">
+      Made with ❤️ by
+      <a
+        class="text-primary-40 hover:underline"
+        href="https://x.com/tomastrajan"
+        >Tomas Trajan</a
+      >
+      from
+      <a
+        class="text-primary-40 hover:underline"
+        href="https://angularexperts.io"
+        target="_blank"
+        >Angular Experts</a
+      >
+    </div>
+  </footer>
+</div>

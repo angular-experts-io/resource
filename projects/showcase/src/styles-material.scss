@@ -1,0 +1,48 @@
+/* You can add global styles to this file, and also import other style files */
+@use "sass:map" as map;
+@use "@angular/material" as mat;
+
+@use "./styles-theme" as theme;
+
+html {
+  color-scheme: light dark;
+  @include mat.theme(
+    (
+      color: theme.$primary-palette,
+      density: 0,
+      typography: (
+        plain-family: Sora,
+        brand-family: Gabarito,
+        bold-weight: 800,
+        medium-weight: 400,
+        regular-weight: 200,
+      ),
+    ),
+    $overrides: ()
+  );
+}
+
+// Customize the entire app. Change :root to your selector if you want to scope the styles.
+:root {
+  @include mat.toolbar-overrides(
+    (
+      container-background-color: map.get(theme.$primary-palette, 98),
+      standard-height: 64px,
+      mobile-height: 64px,
+    )
+  );
+}
+
+mat-icon {
+  font-family: "Material Symbols Outlined", sans-serif;
+  &[ng-reflect-svg-icon] {
+    vertical-align: middle;
+  }
+}
+[mat-icon-button],
+button {
+  mat-icon {
+    position: relative;
+    top: -2px;
+  }
+}

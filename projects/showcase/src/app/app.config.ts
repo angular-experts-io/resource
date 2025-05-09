@@ -1,16 +1,8 @@
-import {
-  ApplicationConfig,
-  provideExperimentalZonelessChangeDetection,
-} from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { ApplicationConfig } from '@angular/core';
 
 import { routes } from './app.routes';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideCore } from './core/core';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideExperimentalZonelessChangeDetection(),
-    provideHttpClient(withFetch()),
-    provideRouter(routes),
-  ],
+  providers: [provideCore({ routes })],
 };
