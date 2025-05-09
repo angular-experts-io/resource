@@ -4,31 +4,18 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'showcase-basic',
   imports: [],
   template: `
-    <h2 class="text-4xl font-bold">Basic</h2>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
-    <p class="my-36">basic works!</p>
+    <h2>Basic</h2>
+    <div class="mt-8 flex flex-col gap-8">
+      <div>
+        <h3>Todo list</h3>
+      </div>
+    </div>
   `,
   styles: `
     :host {
       display: block;
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class BasicComponent {
-
-}
+export default class BasicComponent {}

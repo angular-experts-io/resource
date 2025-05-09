@@ -33,7 +33,7 @@ export interface FeatureLayoutOptions {
     MatIconButton,
   ],
   template: `
-    <div class="mb-8 flex gap-4 md:text-center">
+    <div class="mb-8 flex items-center gap-4 md:text-center">
       <button
         class="md:hidden!"
         mat-icon-button
