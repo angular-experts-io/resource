@@ -1,10 +1,10 @@
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import {
   ChangeDetectionStrategy,
-  Component,
+  Component, effect,
   inject,
   linkedSignal,
-  signal,
+  signal
 } from '@angular/core';
 
 import {
@@ -14,11 +14,16 @@ import {
 } from '@angular/material/sidenav';
 import { MatIcon } from '@angular/material/icon';
 import { MatToolbar } from '@angular/material/toolbar';
-import { MatAnchor, MatIconAnchor, MatIconButton } from '@angular/material/button';
+import {
+  MatAnchor,
+  MatIconAnchor,
+  MatIconButton,
+} from '@angular/material/button';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { fromEvent, map, of, startWith } from 'rxjs';
 import { MatListItem, MatNavList } from '@angular/material/list';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'showcase-main-layout',
@@ -46,6 +51,7 @@ import { MatListItem, MatNavList } from '@angular/material/list';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MainLayoutComponent {
+  #document = inject(DOCUMENT);
   #breakpointObserver = inject(BreakpointObserver);
 
   navigation = signal([
@@ -90,7 +96,36 @@ export default class MainLayoutComponent {
     },
   });
 
+  darkMode = signal<boolean | undefined>(undefined);
+
   toggleSidenav() {
     this.sidenavOpened.update((prev) => !prev);
   }
+
+  #prefersColorSchemeDarkMedia = this.#document.defaultView?.matchMedia(
+    '(prefers-color-scheme: dark)',
+  );
+  #isSystemDarkMode = toSignal(
+    this.#prefersColorSchemeDarkMedia
+      ? fromEvent<MediaQueryListEvent>(
+          this.#prefersColorSchemeDarkMedia,
+          'change',
+        ).pipe(
+          map((event) => event.matches),
+          startWith(this.#prefersColorSchemeDarkMedia.matches),
+        )
+      : of(false),
+    { initialValue: false },
+  );
+  isDarkMode = linkedSignal(this.#isSystemDarkMode);
+  #effectSetDarkModeClassOnBody = effect(() => {
+    const isDarkMode = this.isDarkMode();
+    if (isDarkMode) {
+      this.#document.documentElement.classList.remove('light-mode');
+      this.#document.documentElement.classList.add('dark-mode');
+    } else {
+      this.#document.documentElement.classList.remove('dark-mode');
+      this.#document.documentElement.classList.add('light-mode');
+    }
+  })
 }

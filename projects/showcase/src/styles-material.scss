@@ -4,11 +4,12 @@
 
 @use "./styles-theme" as theme;
 
-html {
-  color-scheme: light dark;
+html.light-mode {
+  color-scheme: light;
   @include mat.theme(
     (
       color: theme.$primary-palette,
+      is-dark: false,
       density: 0,
       typography: (
         plain-family: Sora,
@@ -20,10 +21,7 @@ html {
     ),
     $overrides: ()
   );
-}
 
-// Customize the entire app. Change :root to your selector if you want to scope the styles.
-:root {
   @include mat.toolbar-overrides(
     (
       container-background-color: map.get(theme.$primary-palette, 98),
@@ -45,6 +43,31 @@ html {
       )
     );
   }
+}
+
+html.dark-mode {
+  color-scheme: dark;
+  @include mat.theme(
+    (
+      color: theme.$primary-palette,
+      is-dark: true,
+      density: 0,
+      typography: (
+        plain-family: Sora,
+        brand-family: Gabarito,
+        bold-weight: 800,
+        medium-weight: 400,
+        regular-weight: 200,
+      ),
+    ),
+    $overrides: ()
+  );
+
+  @include mat.toolbar-overrides(
+    (
+      container-background-color: map.get(theme.$primary-palette, 0),
+    )
+  );
 }
 
 mat-icon {
@@ -72,7 +95,7 @@ h6 {
   font-family: var(--mat-sys-title-large-font);
 }
 
-.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field .mdc-notched-outline__notch {
+.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field
+  .mdc-notched-outline__notch {
   border-right: 0 !important;
 }
-

@@ -34,6 +34,15 @@
             {{ nav.label }}
           </a>
         }
+        <button
+          type="button"
+          mat-icon-button
+          (click)="isDarkMode.set(!isDarkMode())"
+        >
+          <mat-icon>{{
+            isDarkMode() ? "brightness_5" : "brightness_2"
+          }}</mat-icon>
+        </button>
         @for (link of externalLinks(); track link.icon) {
           <a
             mat-icon-button
@@ -81,7 +90,9 @@
       </div>
     </mat-sidenav-content>
   </mat-sidenav-container>
-  <footer class="bg-primary-98 mt-auto flex h-16 items-center justify-center">
+  <footer
+    class="bg-primary-98 dark:bg-primary-0 mt-auto flex h-16 items-center justify-center"
+  >
     <div class="container mx-auto text-center">
       Made with ❤️ by
       <a

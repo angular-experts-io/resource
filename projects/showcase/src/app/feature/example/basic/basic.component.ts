@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { MatCard, MatCardContent } from '@angular/material/card';
-import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
+import { MatFormField, MatInput } from '@angular/material/input';
 
 import { restResource } from '@angular-experts/resource';
 
@@ -8,7 +8,7 @@ import { Todo } from '../../../model/todo.model';
 
 @Component({
   selector: 'showcase-basic',
-  imports: [MatCard, MatCardContent, MatFormField, MatLabel, MatInput],
+  imports: [MatCard, MatCardContent, MatFormField, MatInput],
   template: `
     <h2>Basic</h2>
     <div class="mt-8 flex flex-col gap-8">
