@@ -42,9 +42,12 @@ export function restResource<T, ID>(
     },
   });
 
-  const items = linkedSignal({
+  const values = linkedSignal({
     source: resource.value,
-    computation: (source, previous) => {
+    computation: (
+      source: T[] | undefined,
+      previous: { source: T[] | undefined; value: T[] | undefined } | undefined,
+    ) => {
       if (!source && previous?.value) {
         return previous.value;
       } else {
@@ -53,8 +56,28 @@ export function restResource<T, ID>(
     },
   });
 
+  const value = computed(() => {
+    const unwrappedItems = values();
+    if (unwrappedItems?.length === 1) {
+      return unwrappedItems[0];
+    } else {
+      return undefined;
+    }
+  });
+
   const create = streamify<[item: T]>((stream) =>
     stream.pipe(
+      map(([item]) => {
+        if (options?.create?.id?.generator) {
+          const newId = options?.create?.id.generator();
+          if (options?.create?.id?.setter) {
+            options?.create?.id?.setter(newId, item);
+          } else {
+            (item as unknown as { id: ID }).id = newId;
+          }
+        }
+        return [item];
+      }),
       tap(([item]) => {
         loadingCreate.set(true);
         if (isOptimistic('create', options)) {
@@ -183,18 +206,26 @@ export function restResource<T, ID>(
         loadingUpdate() ||
         loadingRemove()),
   );
-  const loadingInitial = computed(() => !items() && resource.isLoading());
+  const loadingInitial = computed(() => !values() && resource.isLoading());
 
   return {
+    // loading
     loadingInitial,
     loading,
     loadingCreate,
     loadingUpdate,
     loadingRemove,
+
+    // error
     errorCreate,
     errorUpdate,
     errorRemove,
-    value: items,
+
+    // value
+    values,
+    value,
+
+    // methods
     create,
     update,
     remove,
@@ -232,7 +263,7 @@ export type Strategy = 'optimistic' | 'pessimistic';
 export interface CrudResourceOptions<T, ID> {
   params?: () => string | undefined;
 
-  // TODO id frontend / backend
+  // id selector for update
   // single item mode? eg computed item if array is length of 1 else undefined ?
   // CQRS vs single item return mode ?
   // return back observable to notify completion (for orchestration)
@@ -246,15 +277,56 @@ export interface CrudResourceOptions<T, ID> {
    */
   strategy?: Strategy;
   create?: {
-    behavior: Behavior;
+    behavior?: Behavior;
     strategy?: Strategy;
+    /**
+     * Optionally generate a new item ID (if the target API does not handle this)
+     * and set it on the item.
+     *
+     * @property generator A function that returns a new ID (e.g., UUID or auto-increment).
+     *                     Used when the backend does not assign one automatically.
+     *
+     * @property setter (Optional) A function that sets the generated ID onto the item,
+     *                  especially useful when the item’s ID field is not named `id`.
+     *
+     * @example
+     * {
+     *   id: {
+     *     generator: () => uuid(),
+     *     setter: (id, item) => {
+     *       item.nonstandardId = id
+     *     }
+     *   }
+     * }
+     *
+     */
+    id?: {
+      /**
+       * A function that generates a new unique ID.
+       * @example
+       * () => uuid()
+       */
+      generator: () => ID;
+      /**
+       * (Optional) Custom logic for assigning the generated ID to the item.
+       *
+       * @param id The generated ID
+       * @param item The item object to modify
+       *
+       * @example
+       * setter: (id, item) => {
+       *   item.nonstandardId = id
+       * }
+       */
+      setter?: (id: ID, item: T) => void;
+    };
   };
   update?: {
-    behavior: Behavior;
+    behavior?: Behavior;
     strategy?: Strategy;
   };
   remove?: {
-    behavior: Behavior;
+    behavior?: Behavior;
     strategy?: Strategy;
   };
 }
