@@ -48,7 +48,7 @@ export interface FeatureLayoutOptions {
       </button>
       <h1 class="text-4xl font-bold">{{ featureLayoutOptions().title }}</h1>
     </div>
-    <nav class="grid grid-cols-4 gap-12 xl:gap-36">
+    <nav class="grid grid-cols-1 md:grid-cols-4 gap-12 xl:gap-36">
       <div class="hidden md:block">
         <ng-container *ngTemplateOutlet="navigation" />
       </div>

@@ -1,23 +1,15 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatInput } from '@angular/material/input';
-import { MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 
 import { restResource } from '@angular-experts/resource';
 
 import { Todo } from '../../../model/todo.model';
+import { TodoItemComponent } from '../../../ui/todo-item/todo-item.component';
+import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.component';
 
 @Component({
   selector: 'showcase-basic',
-  imports: [
-    MatIcon,
-    MatCard,
-    MatInput,
-    MatFormField,
-    MatIconButton,
-    MatCardContent,
-  ],
+  imports: [MatInput, MatFormField, TodoItemComponent, TodoSkeletonComponent],
   template: `
     <h2>Basic</h2>
     <div class="mt-8 flex flex-col gap-8">
@@ -37,28 +29,17 @@ import { Todo } from '../../../model/todo.model';
 
         <div class="flex flex-col gap-4">
           @if (todos.loadingInitial()) {
+            <showcase-todo-skeleton [repeat]="4" />
           } @else {
             @for (todo of todos.values(); track todo.id) {
-              <mat-card appearance="outlined">
-                <mat-card-content>
-                  <div class="flex items-center justify-between gap-4">
-                    {{ todo.description }}
-                    <button
-                      type="button"
-                      mat-icon-button
-                      (click)="handleRemove(todo)"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </div>
-                </mat-card-content>
-              </mat-card>
+              <showcase-todo-item
+                [disabled]="todos.loading()"
+                [todo]="todo"
+                (toggle)="handleToggle(todo)"
+                (remove)="handleRemove(todo)"
+              />
             } @empty {
-              <mat-card appearance="outlined">
-                <mat-card-content
-                  >No todos found, create some...
-                </mat-card-content>
-              </mat-card>
+              <span>No todos found, create some...</span>
             }
           }
         </div>
@@ -72,8 +53,8 @@ import { Todo } from '../../../model/todo.model';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class BasicComponent {
-  todos = restResource<Todo, 'string'>('todos');
+export class BasicComponent {
+  todos = restResource<Todo, string>('todos');
 
   newTodo = signal('');
 
@@ -83,6 +64,10 @@ export default class BasicComponent {
       this.todos.create({ description: newTodo, completed: false });
     }
     this.newTodo.set('');
+  }
+
+  handleToggle(todo: Todo) {
+    this.todos.update(todo.id!, { ...todo, completed: !todo.completed });
   }
 
   handleRemove(todo: Todo) {

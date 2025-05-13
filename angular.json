@@ -43,7 +43,6 @@
           "style": "scss",
           "inlineStyle": true,
           "displayBlock": true,
-          "exportDefault": true,
           "inlineTemplate": true,
           "changeDetection": "OnPush"
         }

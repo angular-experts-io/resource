@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import BehaviorComponent from './behavior.component';
+import { BehaviorComponent } from './behavior.component';
 
 describe('BehaviorComponent', () => {
   let component: BehaviorComponent;

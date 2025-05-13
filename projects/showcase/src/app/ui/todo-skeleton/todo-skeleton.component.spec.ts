@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import TodoSkeletonComponent from './todo-skeleton.component';
+import { TodoSkeletonComponent } from './todo-skeleton.component';
 
 describe('TodoSkeletonComponent', () => {
   let component: TodoSkeletonComponent;

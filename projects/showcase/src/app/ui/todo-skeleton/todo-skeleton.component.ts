@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, Input } from '@angular/core';
+
 
 @Component({
   selector: 'showcase-todo-skeleton',
@@ -15,6 +16,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export default class TodoSkeletonComponent {
-
+export class TodoSkeletonComponent {
+  repeat = input(1);
 }

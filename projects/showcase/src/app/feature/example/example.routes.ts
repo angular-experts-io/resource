@@ -30,11 +30,15 @@ export default <Routes>[
     children: [
       {
         path: 'basic',
-        loadComponent: () => import('./basic/basic.component'),
+        loadComponent: () =>
+          import('./basic/basic.component').then((m) => m.BasicComponent),
       },
       {
         path: 'behavior',
-        loadComponent: () => import('./behavior/behavior.component'),
+        loadComponent: () =>
+          import('./behavior/behavior.component').then(
+            (m) => m.BehaviorComponent,
+          ),
       },
     ],
   },
