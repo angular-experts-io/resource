@@ -140,26 +140,22 @@ export function restResource<T, ID>(
     ),
   );
 
-  const remove = streamify<[id: ID]>((stream) =>
+  const remove = streamify<[item: T]>((stream) =>
     stream.pipe(
       tap(() => loadingRemove.set(true)),
-      map(([id]) => {
-        const removedItem = resource
-          .value()
-          ?.find((item) => getItemId(item, options) === id);
-        if (isOptimistic('remove', options) && removedItem) {
+      tap(([item]) => {
+        if (isOptimistic('remove', options)) {
           resource.update((prev) =>
-            prev?.filter((prevItem) => prevItem !== removedItem),
+            prev?.filter((prevItem) => prevItem !== item),
           );
         }
-        return { id, removedItem };
       }),
-      behaviorToOperator(options?.remove?.behavior)(({ id, removedItem }) =>
-        http.delete(`${apiEndpoint}/${id}`).pipe(
+      behaviorToOperator(options?.remove?.behavior)(([item]) =>
+        http.delete(`${apiEndpoint}/${getItemId(item)}`).pipe(
           catchError((err) => {
             errorUpdate.set(err);
-            if (isOptimistic('remove', options) && removedItem) {
-              resource.update((prev) => [...(prev ?? []), removedItem]);
+            if (isOptimistic('remove', options)) {
+              resource.update((prev) => [...(prev ?? []), item]);
             }
             return [undefined];
           }),

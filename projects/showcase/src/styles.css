@@ -1,6 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark-mode *));
+
 @theme {
   --color-primary-0: #000000;
   --color-primary-10: #0D1532;
