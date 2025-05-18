@@ -1,0 +1,1 @@
+import{Bb as s,Cb as m,Tb as a,jb as n}from"./chunk-GZLIRFW3.js";import"./chunk-7CGTOI24.js";var t=class o{static \u0275fac=function(e){return new(e||o)};static \u0275cmp=n({type:o,selectors:[["showcase-home"]],decls:2,vars:0,template:function(e,i){e&1&&(s(0,"p"),a(1,"home works!"),m())},styles:["[_nghost-%COMP%]{display:block}"],changeDetection:0})};export{t as default};
