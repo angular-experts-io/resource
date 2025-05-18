@@ -1,9 +1,11 @@
 {
   "name": "@angular-experts/resource",
-  "version": "0.0.4",
+  "version": "0.0.1",
   "scripts": {
     "ng": "ng",
+    "prestart": "npm run build:copy-changelog",
     "start": "ng serve -o --hmr=false --port 4400",
+    "prebuild": "npm run build:copy-changelog",
     "build": "ng build resource && ng build showcase",
     "build:copy-assets": "cpx README.md dist/resource",
     "build:copy-changelog": "cpx CHANGELOG.md projects/showcase/public/assets",
@@ -16,7 +18,12 @@
     "format:write": "prettier --write \"./projects/**/*.{ts,html,scss,json}\"",
     "release": "standard-version -a && npm run build:copy-changelog && git add . && git commit -m \"chore: changelog\" && git push --follow-tags origin main"
   },
-  "private": true,
+  "standard-version": {
+    "scripts": {
+      "precommit": "node sync-versions.js && git add ."
+    }
+  },
+  "private": "false"  ,
   "dependencies": {
     "@angular/cdk": "^19.2.15",
     "@angular/common": "^19.2.0",
