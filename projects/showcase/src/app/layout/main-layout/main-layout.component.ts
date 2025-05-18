@@ -63,6 +63,10 @@ export default class MainLayoutComponent {
       label: 'Examples',
       route: 'example',
     },
+    {
+      label: 'Docs',
+      route: 'doc',
+    },
   ]);
 
   externalLinks = signal([

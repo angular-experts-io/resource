@@ -14,4 +14,8 @@ export const routes: Routes = [
     path: 'example',
     loadChildren: () => import('./feature/example/example.routes'),
   },
+  {
+    path: 'doc',
+    loadChildren: () => import('./feature/doc/doc.routes'),
+  },
 ];
