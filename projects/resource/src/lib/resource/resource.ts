@@ -83,7 +83,7 @@ export function restResource<T, ID>(
       tap(([item]) => {
         loadingCreate.set(true);
         if (isOptimistic('create', options)) {
-          if (!options?.create?.id?.generator && !getItemId(item, options)) {
+          if (!options?.create?.id?.generator && !getItemId(item as T, options)) {
             console.warn(
               LOG_PREFIX,
               `Optimistic update can only be performed if the provided item has an ID. ID can be added manually or using "options.create.id.generator", Skip...`,
@@ -184,7 +184,7 @@ export function restResource<T, ID>(
   );
 
   function getItemId(
-    item: Partial<T>,
+    item: T,
     options?: CrudResourceOptions<T, ID>,
   ): ID {
     return options?.idSelector?.(item) ?? (item as unknown as { id: ID }).id;
@@ -275,14 +275,25 @@ export type Behavior = 'concat' | 'merge' | 'switch' | 'exhaust';
 export type Strategy = 'optimistic' | 'pessimistic';
 
 export interface CrudResourceOptions<T, ID> {
+  /**
+   * A reactive function which determines the request to be made.
+   * Whenever the params change, the loader will be triggered to fetch a new value for the resource.
+   *
+   * (works the same way as Angular's `resource`)
+   * 
+   * @returns A string containing URL query parameters or undefined
+   */
   params?: () => string | undefined;
 
-  // id selector for update
-  // single item mode? eg computed item if array is length of 1 else undefined ?
-  // CQRS vs single item return mode ?
-  // return back observable to notify completion (for orchestration)
+  /**
+   * Function to extract the ID from an item when the ID is not stored in the `id` field.
+   * Used to identify items for update and remove operations.
+   * 
+   * @param item The item from which to extract the ID
+   * @returns The ID of the item
+   */
+  idSelector?: (item: T) => ID;
 
-  idSelector?: (item: Partial<T>) => ID;
   /**
    * The default strategy for the resource for every request type,
    * it can be overridden by the request type specific strategy
@@ -291,7 +302,19 @@ export interface CrudResourceOptions<T, ID> {
    */
   strategy?: Strategy;
   create?: {
+    /**
+     * Defines how create requests are handled when multiple requests are made.
+     * Controls the RxJS flattening operator used for the HTTP request.
+     * 
+     * @default 'concat'
+     */
     behavior?: Behavior;
+    /**
+     * Determines whether changes are applied optimistically (before server confirmation)
+     * or pessimistically (after server confirmation) for create operations.
+     * 
+     * @default The value of the global strategy option
+     */
     strategy?: Strategy;
     /**
      * Optionally generate a new item ID (if the target API does not handle this)
@@ -336,11 +359,42 @@ export interface CrudResourceOptions<T, ID> {
     };
   };
   update?: {
+    /**
+     * Defines how update requests are handled when multiple requests are made.
+     * Controls the RxJS flattening operator used for the HTTP request.
+     * 
+     * @default 'concat'
+     */
     behavior?: Behavior;
+    /**
+     * Determines whether changes are applied optimistically (before server confirmation)
+     * or pessimistically (after server confirmation) for update operations.
+     * 
+     * @default The value of the global strategy option
+     */
     strategy?: Strategy;
   };
   remove?: {
+    /**
+     * Defines how remove requests are handled when multiple requests are made.
+     * Controls the RxJS flattening operator used for the HTTP request.
+     * 
+     * @default 'concat'
+     */
     behavior?: Behavior;
+    /**
+     * Determines whether changes are applied optimistically (before server confirmation)
+     * or pessimistically (after server confirmation) for remove operations.
+     * 
+     * @default The value of the global strategy option
+     */
     strategy?: Strategy;
   };
 }
+
+
+// TODO
+// id selector for update
+// single item mode? eg computed item if array is length of 1 else undefined ?
+// CQRS vs single item return mode ?
+// return back observable to notify completion (for orchestration)
