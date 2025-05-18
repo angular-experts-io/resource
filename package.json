@@ -6,7 +6,7 @@
     "start": "ng serve -o --hmr=false --port 4400",
     "build": "ng build resource && ng build showcase",
     "build:copy-assets": "cpx README.md dist/resource",
-    "build:copy-changelog": "cpx CHANGELOG.md projects/elements-demo/src/assets",
+    "build:copy-changelog": "cpx CHANGELOG.md projects/showcase/public/assets",
     "watch": "ng build --watch --configuration development",
     "lint": "ng lint",
     "test": "npm run test:lib && npm run test:showcase",
