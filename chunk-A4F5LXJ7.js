@@ -1,0 +1,1 @@
+import{Ob as a,gb as o,wb as n,xb as i}from"./chunk-3CSEOLGU.js";import"./chunk-7CGTOI24.js";var p=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=o({type:t,selectors:[["showcase-api"]],decls:2,vars:0,template:function(e,c){e&1&&(n(0,"p"),a(1," api works! "),i())},styles:["[_nghost-%COMP%]{display:block}"],changeDetection:0})};export{p as ApiComponent};
