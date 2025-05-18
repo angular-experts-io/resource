@@ -14,7 +14,7 @@
     "test:showcase": "node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js --config projects/showcase/jest.config.ts",
     "format:test": "prettier --list-different \"./projects/**/*.{ts,html,scss,json}\"",
     "format:write": "prettier --write \"./projects/**/*.{ts,html,scss,json}\"",
-    "release": "standard-version -a && npm run build:copy-changelog && git add projects/showcase/public/assets/CHANGELOG.md && git commit -m 'chore: changelog' && git push --follow-tags origin master"
+    "release": "standard-version -a && npm run build:copy-changelog && git add . && git commit -m 'chore: changelog' && git push --follow-tags origin master"
   },
   "private": true,
   "dependencies": {
