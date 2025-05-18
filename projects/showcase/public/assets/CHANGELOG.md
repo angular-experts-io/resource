@@ -2,10 +2,6 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [0.0.4](https://github.com/angular-experts-io/resource/compare/v0.0.3...v0.0.4) (2025-05-18)
-
-### [0.0.3](https://github.com/angular-experts-io/resource/compare/v0.0.2...v0.0.3) (2025-05-18)
-
 ### 0.0.2 (2025-05-18)
 
 
@@ -23,3 +19,7 @@ All notable changes to this project will be documented in this file. See [standa
 * tailwind dark mode, todo item stub ([96d8b08](https://github.com/angular-experts-io/resource/commit/96d8b084d0fde34a45b61868be1c967b5ba44789))
 * todo item ([e95f916](https://github.com/angular-experts-io/resource/commit/e95f9168ae11dc72c8bf526ef388c5b05ebd76b3))
 * workspace setup ([27ff131](https://github.com/angular-experts-io/resource/commit/27ff13121f284732e2a43a163dda546bb0c537a5))
+
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
