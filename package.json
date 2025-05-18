@@ -23,7 +23,7 @@
       "precommit": "node sync-versions.js && git add ."
     }
   },
-  "private": "false"  ,
+  "private": "false",
   "dependencies": {
     "@angular/cdk": "^19.2.15",
     "@angular/common": "^19.2.0",
