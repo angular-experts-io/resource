@@ -7,7 +7,7 @@ const PATTERN = new RegExp(`${TOKEN_START}[\\s\\S]*${TOKEN_END}`, 'gim');
 const INNER_PACKAGE_JSON_PATH = './projects/resource/package.json';
 const TARGETS = [
   './projects/showcase/src/environments/environment.ts',
-  './projects/showcase/src/environments/environment.dev.ts'
+  './projects/showcase/src/environments/environment.development.ts'
 ];
 
 // inner package.json
