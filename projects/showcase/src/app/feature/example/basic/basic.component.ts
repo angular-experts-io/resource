@@ -67,7 +67,7 @@ export class BasicComponent {
   }
 
   handleToggle(todo: Todo) {
-    this.todos.update(todo.id!, { ...todo, completed: !todo.completed });
+    this.todos.update({ ...todo, completed: !todo.completed });
   }
 
   handleRemove(todo: Todo) {

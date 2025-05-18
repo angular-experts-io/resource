@@ -20,6 +20,8 @@ import {
   map,
 } from 'rxjs';
 
+const LOG_PREFIX = `[@angular-experts/resource]`;
+
 export function restResource<T, ID>(
   apiEndpoint: string,
   options?: CrudResourceOptions<T, ID>,
@@ -65,7 +67,7 @@ export function restResource<T, ID>(
     }
   });
 
-  const create = streamify<[item: T]>((stream) =>
+  const create = streamify<[item: Partial<T>]>((stream) =>
     stream.pipe(
       map(([item]) => {
         if (options?.create?.id?.generator) {
@@ -81,7 +83,14 @@ export function restResource<T, ID>(
       tap(([item]) => {
         loadingCreate.set(true);
         if (isOptimistic('create', options)) {
-          resource.update((prev) => [...(prev ?? []), item]);
+          if (!options?.create?.id?.generator && !getItemId(item, options)) {
+            console.warn(
+              LOG_PREFIX,
+              `Optimistic update can only be performed if the provided item has an ID. ID can be added manually or using "options.create.id.generator", Skip...`,
+            );
+            return;
+          }
+          resource.update((prev) => [...(prev ?? []), item as T]);
         }
       }),
       behaviorToOperator(options?.create?.behavior)(([item]) =>
@@ -104,35 +113,41 @@ export function restResource<T, ID>(
     ),
   );
 
-  const update = streamify<[id: ID, item: T]>((stream) =>
+  const update = streamify<[item: T]>((stream) =>
     stream.pipe(
-      tap(([id, item]) => {
+      tap(([item]) => {
         loadingUpdate.set(true);
         if (isOptimistic('update', options)) {
+          const updatedItemId = getItemId(item, options);
           resource.update((prev) =>
             prev?.map((prevItem) => {
-              return getItemId(prevItem, options) === id
+              return getItemId(prevItem, options) === updatedItemId
                 ? { ...prevItem, ...item }
                 : prevItem;
             }),
           );
         }
       }),
-      behaviorToOperator(options?.update?.behavior)(([id, item]) =>
-        http.put(`${apiEndpoint}/${id}`, item).pipe(
-          catchError((err) => {
-            errorUpdate.set(err);
-            if ((options?.update?.strategy ?? strategy) === 'optimistic') {
-              resource.update((prev) =>
-                prev?.map((prevItem) => {
-                  return getItemId(prevItem, options) === id ? item : prevItem;
-                }),
-              );
-            }
-            return [undefined];
-          }),
-        ),
-      ),
+      behaviorToOperator(options?.update?.behavior)(([item]) => {
+        const updatedItemId = getItemId(item, options);
+        return http
+          .put(`${apiEndpoint}/${updatedItemId?.toString()}`, item)
+          .pipe(
+            catchError((err) => {
+              errorUpdate.set(err);
+              if ((options?.update?.strategy ?? strategy) === 'optimistic') {
+                resource.update((prev) =>
+                  prev?.map((prevItem) => {
+                    return getItemId(prevItem, options) === updatedItemId
+                      ? item
+                      : prevItem;
+                  }),
+                );
+              }
+              return [undefined];
+            }),
+          );
+      }),
       tap(() => {
         reloadIfPessimisticOrHasParams('update', resource, options);
         loadingUpdate.set(false);
@@ -168,7 +183,10 @@ export function restResource<T, ID>(
     ),
   );
 
-  function getItemId(item: T, options?: CrudResourceOptions<T, ID>): ID {
+  function getItemId(
+    item: Partial<T>,
+    options?: CrudResourceOptions<T, ID>,
+  ): ID {
     return options?.idSelector?.(item) ?? (item as unknown as { id: ID }).id;
   }
 
@@ -264,7 +282,7 @@ export interface CrudResourceOptions<T, ID> {
   // CQRS vs single item return mode ?
   // return back observable to notify completion (for orchestration)
 
-  idSelector?: (item: T) => ID;
+  idSelector?: (item: Partial<T>) => ID;
   /**
    * The default strategy for the resource for every request type,
    * it can be overridden by the request type specific strategy
@@ -314,7 +332,7 @@ export interface CrudResourceOptions<T, ID> {
        *   item.nonstandardId = id
        * }
        */
-      setter?: (id: ID, item: T) => void;
+      setter?: (id: ID, item: Partial<T>) => void;
     };
   };
   update?: {
