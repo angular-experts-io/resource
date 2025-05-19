@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/angular-experts-io/resource/compare/v0.0.2...v0.0.3) (2025-05-19)
+
+
+### Features
+
+* **api:** add api doc ([b97340f](https://github.com/angular-experts-io/resource/commit/b97340f0eed0c8fddf2ff4117b180ea943ccf02f))
+* **build:** add baseHref for production configuration ([0001e81](https://github.com/angular-experts-io/resource/commit/0001e81be0a90047401bc8bc5f80399e8117cef9))
+* **dependencies:** add missing @angular/animations package ([19b8f21](https://github.com/angular-experts-io/resource/commit/19b8f216b95894af493aa3f92d6c96f80c4e3e9b))
+* **doc:** add docs feature ([a971208](https://github.com/angular-experts-io/resource/commit/a9712082269a5c7a9b95ee27fba69ae459a34298))
+* **resource:** add hasValue, hasValues and reload methods ([2d60e25](https://github.com/angular-experts-io/resource/commit/2d60e259da4132df11b0bced0597fca05430c769))
+* **resource:** enhance type safety and add documentation for CrudResourceOptions ([8eee86b](https://github.com/angular-experts-io/resource/commit/8eee86b3b53946cab5f76762a73ae7773c0b7947))
+
 ### 0.0.2 (2025-05-18)
 
 
