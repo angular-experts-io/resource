@@ -25,7 +25,7 @@ const LOG_PREFIX = `[@angular-experts/resource]`;
 export function restResource<T, ID>(
   apiEndpoint: string,
   options?: RestResourceOptions<T, ID>,
-)  {
+) {
   const http = inject(HttpClient);
 
   const strategy = options?.strategy ?? 'pessimistic';
@@ -40,7 +40,9 @@ export function restResource<T, ID>(
   const resource = rxResource({
     request: () => options?.params?.() ?? '',
     loader: ({ request }) => {
-      return http.get<T[]>(`${apiEndpoint}${request}`);
+      const fullUrl = `${apiEndpoint}${request}`;
+      verbose('Read (Angular resource)', { request, fullUrl });
+      return http.get<T[]>(fullUrl);
     },
   });
 
@@ -83,7 +85,10 @@ export function restResource<T, ID>(
       tap(([item]) => {
         loadingCreate.set(true);
         if (isOptimistic('create', options)) {
-          if (!options?.create?.id?.generator && !getItemId(item as T, options)) {
+          if (
+            !options?.create?.id?.generator &&
+            !getItemId(item as T, options)
+          ) {
             console.warn(
               LOG_PREFIX,
               `Optimistic update can only be performed if the provided item has an ID. ID can be added manually or using "options.create.id.generator", Skip...`,
@@ -183,10 +188,7 @@ export function restResource<T, ID>(
     ),
   );
 
-  function getItemId(
-    item: T,
-    options?: RestResourceOptions<T, ID>,
-  ): ID {
+  function getItemId(item: T, options?: RestResourceOptions<T, ID>): ID {
     return options?.idSelector?.(item) ?? (item as unknown as { id: ID }).id;
   }
 
@@ -209,6 +211,12 @@ export function restResource<T, ID>(
       options?.params
     ) {
       resource.reload();
+    }
+  }
+
+  function verbose(...args: unknown[]) {
+    if (options?.verbose) {
+      console.debug(LOG_PREFIX, ...args);
     }
   }
 
@@ -259,6 +267,9 @@ export function restResource<T, ID>(
     create,
     update,
     remove,
+
+    // LIFECYCLE
+    destroy: resource.destroy.bind(resource),
   };
 }
 
@@ -292,11 +303,18 @@ export type Strategy = 'optimistic' | 'pessimistic';
 
 export interface RestResourceOptions<T, ID> {
   /**
+   * Whether to log verbose information to the console.
+   * This is useful for debugging and understanding the resource's behavior.
+   *
+   * @default false
+   */
+  verbose?: boolean;
+  /**
    * A reactive function which determines the request to be made.
    * Whenever the params change, the loader will be triggered to fetch a new value for the resource.
    *
    * (works the same way as Angular's `resource`)
-   * 
+   *
    * @returns A string containing URL query parameters or undefined
    */
   params?: () => string | undefined;
@@ -304,7 +322,7 @@ export interface RestResourceOptions<T, ID> {
   /**
    * Function to extract the ID from an item when the ID is not stored in the `id` field.
    * Used to identify items for update and remove operations.
-   * 
+   *
    * @param item The item from which to extract the ID
    * @returns The ID of the item
    */
@@ -321,14 +339,14 @@ export interface RestResourceOptions<T, ID> {
     /**
      * Defines how create requests are handled when multiple requests are made.
      * Controls the RxJS flattening operator used for the HTTP request.
-     * 
+     *
      * @default 'concat'
      */
     behavior?: Behavior;
     /**
      * Determines whether changes are applied optimistically (before server confirmation)
      * or pessimistically (after server confirmation) for create operations.
-     * 
+     *
      * @default The value of the global strategy option
      */
     strategy?: Strategy;
@@ -378,14 +396,14 @@ export interface RestResourceOptions<T, ID> {
     /**
      * Defines how update requests are handled when multiple requests are made.
      * Controls the RxJS flattening operator used for the HTTP request.
-     * 
+     *
      * @default 'concat'
      */
     behavior?: Behavior;
     /**
      * Determines whether changes are applied optimistically (before server confirmation)
      * or pessimistically (after server confirmation) for update operations.
-     * 
+     *
      * @default The value of the global strategy option
      */
     strategy?: Strategy;
@@ -394,20 +412,19 @@ export interface RestResourceOptions<T, ID> {
     /**
      * Defines how remove requests are handled when multiple requests are made.
      * Controls the RxJS flattening operator used for the HTTP request.
-     * 
+     *
      * @default 'concat'
      */
     behavior?: Behavior;
     /**
      * Determines whether changes are applied optimistically (before server confirmation)
      * or pessimistically (after server confirmation) for remove operations.
-     * 
+     *
      * @default The value of the global strategy option
      */
     strategy?: Strategy;
   };
 }
-
 
 // TODO
 // id selector for update

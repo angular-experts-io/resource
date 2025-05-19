@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { of, throwError } from 'rxjs';
+import { delay, of, throwError } from 'rxjs';
 
 import { restResource } from './resource';
 
@@ -34,152 +34,254 @@ describe('Rest Resource', () => {
     injector = TestBed.inject(Injector);
   });
 
-  describe('Entity with ID stored in the "id" property', () => {
-    let resource: ReturnType<
-      typeof restResource<EntityWithIdInIdProperty, 'string'>
-    >;
+  describe('CRUD', () => {
+    describe('Read', () => {
+      let resource: ReturnType<
+        typeof restResource<EntityWithIdInIdProperty, 'string'>
+      >;
 
-    beforeEach(() => {
-      mockGet.mockReturnValue(of(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY));
-      runInInjectionContext(injector, () => {
-        resource = restResource<EntityWithIdInIdProperty, 'string'>('some/api');
+      beforeEach(() => {
+        mockGet.mockReturnValue(of(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY));
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+            'some/api',
+          );
+        });
+      });
+
+      it('loads and exposes data in the values', async () => {
+        await tick();
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+        expect(resource.hasValue()).toBe(false);
+        expect(resource.value()).toBe(undefined);
+      });
+
+      it('loads and exposes data in the value as long as ony one item is returned', async () => {
+        mockGet.mockReturnValue(of([TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]]));
+        await tick();
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(1);
+        expect(resource.hasValue()).toBe(true);
+        expect(resource.value()).toEqual(
+          TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
+        );
+      });
+
+      it('sets loadingInitial (but NOT loading) when loading entities for the first time', async () => {
+        expect(resource.loadingInitial()).toBe(true);
+        expect(resource.loading()).toBe(false);
+
+        await tick();
+
+        expect(resource.loadingInitial()).toBe(false);
+        expect(resource.loading()).toBe(false);
+      });
+
+      it('sets loadingInitial (but NOT loading) when loading entities for the first time', async () => {
+        expect(resource.loadingInitial()).toBe(true);
+        expect(resource.loading()).toBe(false);
+
+        await tick();
+
+        resource.reload();
+
+        expect(resource.loadingInitial()).toBe(false);
+        expect(resource.loading()).toBe(true);
+
+        await tick();
+
+        expect(resource.loadingInitial()).toBe(false);
+        expect(resource.loading()).toBe(false);
+      });
+
+      it('exposes error if it happens', async () => {
+        mockGet.mockReturnValueOnce(throwError(() => new Error('404')));
+        expect(resource.loadingInitial()).toBe(true);
+        expect(resource.loading()).toBe(false);
+        expect(resource.errorRead()).toBe(undefined);
+
+        await tick();
+
+        expect(resource.loadingInitial()).toBe(false);
+        expect(resource.loading()).toBe(false);
+        expect(resource.errorRead()).toEqual(new Error('404'));
+
+        resource.reload();
+
+        // prev initial loading failed
+        expect(resource.loadingInitial()).toBe(true);
+        expect(resource.loading()).toBe(false);
+        // error stays (Angular resource behavior)
+        expect(resource.errorRead()).toEqual(new Error('404'));
+
+        await tick();
+
+        expect(resource.loadingInitial()).toBe(false);
+        expect(resource.loading()).toBe(false);
+        expect(resource.errorRead()).toBe(undefined);
       });
     });
 
-    describe('CRUD', () => {
-      describe('Read', () => {
-        it('loads and exposes data in the values', async () => {
-          await tick();
-          expect(resource.hasValues()).toBe(true);
-          expect(resource.values()?.length).toBe(2);
-          expect(resource.hasValue()).toBe(false);
-          expect(resource.value()).toBe(undefined);
-        });
+    describe('Read with params', () => {
+      let resource: ReturnType<
+        typeof restResource<EntityWithIdInIdProperty, 'string'>
+      >;
+      const paramsId = signal<string | undefined>(undefined);
 
-        it('loads and exposes data in the value as long as ony one item is returned', async () => {
-          mockGet.mockReturnValue(
-            of([TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]]),
+      beforeEach(() => {
+        paramsId.set(undefined);
+        mockGet.mockImplementation((...args) => {
+          const url = args[0] as string;
+          let result;
+          if (url.includes('/1')) {
+            result = [TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]];
+          } else if (url.includes('/2')) {
+            result = [TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1]];
+          } else {
+            result = TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY;
+          }
+          return of(result).pipe(delay(10));
+        });
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+            'some/api',
+            {
+              params: () => paramsId() ? `/${paramsId()}` : undefined,
+            },
           );
-          await tick();
-          expect(resource.hasValues()).toBe(true);
-          expect(resource.values()?.length).toBe(1);
-          expect(resource.hasValue()).toBe(true);
-          expect(resource.value()).toEqual(
-            TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
-          );
-        });
-
-        it('sets loadingInitial (but NOT loading) when loading entities for the first time', async () => {
-          expect(resource.loadingInitial()).toBe(true);
-          expect(resource.loading()).toBe(false);
-
-          await tick();
-
-          expect(resource.loadingInitial()).toBe(false);
-          expect(resource.loading()).toBe(false);
-        });
-
-        it('sets loadingInitial (but NOT loading) when loading entities for the first time', async () => {
-          expect(resource.loadingInitial()).toBe(true);
-          expect(resource.loading()).toBe(false);
-
-          await tick();
-
-          resource.reload();
-
-          expect(resource.loadingInitial()).toBe(false);
-          expect(resource.loading()).toBe(true);
-
-          await tick();
-
-          expect(resource.loadingInitial()).toBe(false);
-          expect(resource.loading()).toBe(false);
-        });
-
-        it('exposes error if it happens', async () => {
-          mockGet.mockReturnValueOnce(throwError(() => new Error('404')));
-          expect(resource.loadingInitial()).toBe(true);
-          expect(resource.loading()).toBe(false);
-          expect(resource.errorRead()).toBe(undefined);
-
-          await tick();
-
-          expect(resource.loadingInitial()).toBe(false);
-          expect(resource.loading()).toBe(false);
-          expect(resource.errorRead()).toEqual(new Error('404'));
-
-          resource.reload();
-
-          // prev initial loading failed
-          expect(resource.loadingInitial()).toBe(true);
-          expect(resource.loading()).toBe(false);
-          // error stays (Angular resource behavior)
-          expect(resource.errorRead()).toEqual(new Error('404'));
-
-          await tick();
-
-          expect(resource.loadingInitial()).toBe(false);
-          expect(resource.loading()).toBe(false);
-          expect(resource.errorRead()).toBe(undefined);
         });
       });
 
-      describe('Read with params', () => {
-        const paramsId = signal<string | undefined>(undefined);
+      it('loads all values when no id was specified', async () => {
+        await tick(); // trigger
+        await tick(20); // wait for an initial load
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+        expect(resource.hasValue()).toBe(false);
+        expect(resource.value()).toBe(undefined);
+      });
 
-        beforeEach(() => {
-          paramsId.set(undefined);
-          mockGet.mockImplementation((...args) => {
-            const url = args[0] as string;
-            if (url.includes('id=1')) {
-              return of([TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]]);
-            } else if (url.includes('id=2')) {
-              return of([TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1]]);
-            } else {
-              return of(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY);
-            }
-          });
-          runInInjectionContext(injector, () => {
-            resource = restResource<EntityWithIdInIdProperty, 'string'>(
-              'some/api',
-              {
-                params: () => `&id=${paramsId()}`,
-              },
-            );
-          });
+      it('reloads items on params change', async () => {
+        await tick(); // trigger
+        await tick(20); // wait for an initial load
+        expect(resource.values()?.length).toBe(2);
+
+        paramsId.set('1');
+        await tick();
+        await tick(20);
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(1);
+        expect(resource.hasValue()).toBe(true);
+        expect(resource.value()).toEqual(
+          TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
+        );
+      });
+    });
+
+    describe('Remove', () => {
+      let resource: ReturnType<
+        typeof restResource<EntityWithIdInIdProperty, 'string'>
+      >;
+      let data: EntityWithIdInIdProperty[];
+
+      beforeEach(() => {
+        data = [...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY];
+        mockGet.mockImplementation(() => of(data));
+        mockDelete.mockImplementation((...args) => {
+          const url = args[0] as string;
+          if (url.includes('/1')) {
+            data = data.filter((item) => item.id !== '1');
+          } else if (url.includes('/2')) {
+            data = data.filter((item) => item.id !== '2');
+          }
+          return of(undefined).pipe(delay(10));
         });
 
-        it('loads all values when no id was specified', async () => {
-          await tick();
-          expect(resource.hasValues()).toBe(true);
-          expect(resource.values()?.length).toBe(2);
-          expect(resource.hasValue()).toBe(false);
-          expect(resource.value()).toBe(undefined);
-        });
+      });
 
-        it('reloads items on params change', async () => {
-          await tick();
-          expect(resource.values()?.length).toBe(2);
-
-          paramsId.set('1');
-          await tick();
-          expect(resource.hasValues()).toBe(true);
-          expect(resource.values()?.length).toBe(1);
-          expect(resource.hasValue()).toBe(true);
-          expect(resource.value()).toEqual(
-            TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
+      it('removes first item and reloads collection (pessimistic)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+            'some/api',
           );
         });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]);
+
+        await tick(20); // wait for delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(2);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(1);
+        expect(resource.values()).toEqual([
+          TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
+        ]);
+      });
+
+      it('removes first item and does not reload collection (optimistic)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+            'some/api',
+            { remove: { strategy: 'optimistic' } },
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]);
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(mockGet).toHaveBeenCalledTimes(1);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(1);
+        expect(resource.values()).toEqual([
+          TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
+        ]);
+      });
+
+      it('sets remove loading and loading state while removing', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+            'some/api',
+            { remove: { strategy: 'optimistic' } },
+          );
+        });
+        await tick();
+
+        expect(resource.loading()).toBe(false);
+        expect(resource.loadingRemove()).toBe(false);
+
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]);
+
+        expect(resource.loading()).toBe(true);
+        expect(resource.loadingRemove()).toBe(true);
+
+        await tick(20);
+
+        expect(resource.loading()).toBe(false);
+        expect(resource.loadingRemove()).toBe(false);
       });
     });
   });
 });
 
-async function tick() {
+async function tick(delay = 0) {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(true);
-    });
+    }, delay);
   });
 }
 
