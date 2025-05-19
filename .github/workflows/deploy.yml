@@ -29,6 +29,12 @@ jobs:
       - name: Build (copy assets)
         run: npm run build:copy-assets
 
+      - name: Test (resource)
+        run: npm run test:lib
+
+      - name: Test (showcase)
+        run: npm run test:showcase
+
       - name: Deploy Github Pages
         if: success()
         uses: JamesIves/github-pages-deploy-action@v4

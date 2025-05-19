@@ -24,8 +24,8 @@ const LOG_PREFIX = `[@angular-experts/resource]`;
 
 export function restResource<T, ID>(
   apiEndpoint: string,
-  options?: CrudResourceOptions<T, ID>,
-) {
+  options?: RestResourceOptions<T, ID>,
+)  {
   const http = inject(HttpClient);
 
   const strategy = options?.strategy ?? 'pessimistic';
@@ -185,14 +185,14 @@ export function restResource<T, ID>(
 
   function getItemId(
     item: T,
-    options?: CrudResourceOptions<T, ID>,
+    options?: RestResourceOptions<T, ID>,
   ): ID {
     return options?.idSelector?.(item) ?? (item as unknown as { id: ID }).id;
   }
 
   function isOptimistic(
     requestType: RequestType,
-    options?: CrudResourceOptions<T, ID>,
+    options?: RestResourceOptions<T, ID>,
   ) {
     return (options?.[requestType]?.strategy ?? strategy) === 'optimistic';
   }
@@ -200,7 +200,7 @@ export function restResource<T, ID>(
   function reloadIfPessimisticOrHasParams(
     requestType: RequestType,
     resource: ResourceRef<T[] | undefined>,
-    options?: CrudResourceOptions<T, ID>,
+    options?: RestResourceOptions<T, ID>,
   ) {
     if (
       (options?.[requestType]?.strategy ??
@@ -223,23 +223,39 @@ export function restResource<T, ID>(
   const loadingInitial = computed(() => !values() && resource.isLoading());
 
   return {
-    // loading
+    // LOADING
     loadingInitial,
     loading,
     loadingCreate,
     loadingUpdate,
     loadingRemove,
 
-    // error
+    // ERRORS
+    errorRead: resource.error,
     errorCreate,
     errorUpdate,
     errorRemove,
 
-    // value
-    values,
+    // VALUES
+    /**
+     * The value of the resource, ONLY if the resource is a single item.
+     *
+     * This is useful when building a resource to manage a single entity, eg detail view.
+     *
+     * @returns Signal of single item or undefined (also returns undefined if resource has more than one item)
+     */
     value,
+    /**
+     * The values of the resource (eg list of 0 to n items).
+     *
+     * @returns Signal of a list of items or undefined (also returns undefined if resource has no items)
+     */
+    values,
+    hasValue: computed(() => !!value()),
+    hasValues: computed(() => !!values()?.length),
 
-    // methods
+    // METHODS
+    reload: resource.reload.bind(resource),
     create,
     update,
     remove,
@@ -274,7 +290,7 @@ export type RequestType = 'create' | 'update' | 'remove';
 export type Behavior = 'concat' | 'merge' | 'switch' | 'exhaust';
 export type Strategy = 'optimistic' | 'pessimistic';
 
-export interface CrudResourceOptions<T, ID> {
+export interface RestResourceOptions<T, ID> {
   /**
    * A reactive function which determines the request to be made.
    * Whenever the params change, the loader will be triggered to fetch a new value for the resource.
