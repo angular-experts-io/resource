@@ -22,7 +22,8 @@ import {
 
 const LOG_PREFIX = `[@angular-experts/resource]`;
 
-export function restResource<T, ID>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function restResource<T, ID, E = any>(
   apiEndpoint: string,
   options?: RestResourceOptions<T, ID>,
 ) {
@@ -33,9 +34,9 @@ export function restResource<T, ID>(
   const loadingCreate = signal(false);
   const loadingUpdate = signal(false);
   const loadingRemove = signal(false);
-  const errorCreate = signal('');
-  const errorUpdate = signal('');
-  const errorRemove = signal('');
+  const errorCreate = signal<E | undefined>(undefined);
+  const errorUpdate = signal<E | undefined>(undefined);
+  const errorRemove = signal<E | undefined>(undefined);
 
   const resource = rxResource({
     request: () => options?.params?.() ?? '',
@@ -173,7 +174,7 @@ export function restResource<T, ID>(
       behaviorToOperator(options?.remove?.behavior)(([item]) =>
         http.delete(`${apiEndpoint}/${getItemId(item)}`).pipe(
           catchError((err) => {
-            errorUpdate.set(err);
+            errorRemove.set(err);
             if (isOptimistic('remove', options)) {
               resource.update((prev) => [...(prev ?? []), item]);
             }

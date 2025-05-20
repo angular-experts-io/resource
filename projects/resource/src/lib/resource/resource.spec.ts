@@ -147,7 +147,7 @@ describe('Rest Resource', () => {
           resource = restResource<EntityWithIdInIdProperty, 'string'>(
             'some/api',
             {
-              params: () => paramsId() ? `/${paramsId()}` : undefined,
+              params: () => (paramsId() ? `/${paramsId()}` : undefined),
             },
           );
         });
@@ -177,6 +177,21 @@ describe('Rest Resource', () => {
           TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
         );
       });
+
+      it('preserves previous value while reloading becasue params have changed', async () => {
+        await tick(); // trigger
+        await tick(20); // wait for an initial load
+        expect(resource.values()?.length).toBe(2);
+
+        paramsId.set('1');
+        await tick();
+
+        // preserves original valuees
+        expect(resource.values()?.length).toBe(2);
+
+        await tick(20);
+        expect(resource.values()?.length).toBe(1);
+      });
     });
 
     describe('Remove', () => {
@@ -190,14 +205,14 @@ describe('Rest Resource', () => {
         mockGet.mockImplementation(() => of(data));
         mockDelete.mockImplementation((...args) => {
           const url = args[0] as string;
-          if (url.includes('/1')) {
+          if (url.includes('/wrong')) {
+          } else if (url.includes('/1')) {
             data = data.filter((item) => item.id !== '1');
           } else if (url.includes('/2')) {
             data = data.filter((item) => item.id !== '2');
           }
           return of(undefined).pipe(delay(10));
         });
-
       });
 
       it('removes first item and reloads collection (pessimistic)', async () => {
@@ -272,6 +287,29 @@ describe('Rest Resource', () => {
 
         expect(resource.loading()).toBe(false);
         expect(resource.loadingRemove()).toBe(false);
+      });
+
+      it('handles error and reloads (pessimistic)', async () => {
+        mockDelete.mockImplementation(() =>
+          throwError(() => new Error('404')).pipe(delay(10)),
+        );
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+            'some/api',
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]);
+
+        await tick(20); // wait for delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(2);
+        expect(resource.errorRemove()).toEqual(new Error('404'));
       });
     });
   });
