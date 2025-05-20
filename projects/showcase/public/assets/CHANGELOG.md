@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4](https://github.com/angular-experts-io/resource/compare/v0.0.3...v0.0.4) (2025-05-20)
+
+
+### Bug Fixes
+
+* **resource:** correctly set remove error when remove fails ([31d51cf](https://github.com/angular-experts-io/resource/commit/31d51cf9b442288afe948392c767a46b21843533))
+
 ### [0.0.3](https://github.com/angular-experts-io/resource/compare/v0.0.2...v0.0.3) (2025-05-19)
 
 
