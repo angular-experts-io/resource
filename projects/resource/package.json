@@ -1,6 +1,6 @@
 {
   "name": "@angular-experts/resource",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "peerDependencies": {
     "@angular/common": "^19.2.0",
     "@angular/core": "^19.2.0"
