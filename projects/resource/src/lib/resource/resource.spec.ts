@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { TestBed } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import { delay, of, throwError } from 'rxjs';
+import { delay, mergeMap, of, tap, throwError, timer } from 'rxjs';
 
 import { restResource } from './resource';
 
@@ -35,21 +35,19 @@ describe('Rest Resource', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks()
-  })
+    jest.restoreAllMocks();
+  });
 
   describe('CRUD', () => {
     describe('Read', () => {
       let resource: ReturnType<
-        typeof restResource<EntityWithIdInIdProperty, 'string'>
+        typeof restResource<EntityWithIdInIdProperty, string>
       >;
 
       beforeEach(() => {
         mockGet.mockReturnValue(of(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY));
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
-            'some/api',
-          );
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
         });
       });
 
@@ -129,7 +127,7 @@ describe('Rest Resource', () => {
 
     describe('Read with params', () => {
       let resource: ReturnType<
-        typeof restResource<EntityWithIdInIdProperty, 'string'>
+        typeof restResource<EntityWithIdInIdProperty, string>
       >;
       const paramsId = signal<string | undefined>(undefined);
 
@@ -148,7 +146,7 @@ describe('Rest Resource', () => {
           return of(result).pipe(delay(10));
         });
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+          resource = restResource<EntityWithIdInIdProperty, string>(
             'some/api',
             {
               params: () => (paramsId() ? `/${paramsId()}` : undefined),
@@ -200,7 +198,7 @@ describe('Rest Resource', () => {
 
     describe('Create', () => {
       let resource: ReturnType<
-        typeof restResource<EntityWithIdInIdProperty, 'string'>
+        typeof restResource<EntityWithIdInIdProperty, string>
       >;
       let data: EntityWithIdInIdProperty[];
 
@@ -216,9 +214,7 @@ describe('Rest Resource', () => {
 
       it('creates an item and reloads the collection (pessimistic)', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
-            'some/api',
-          );
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
         });
         await tick();
 
@@ -245,7 +241,7 @@ describe('Rest Resource', () => {
 
       it('creates an item and does not reload collection (optimistic)', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+          resource = restResource<EntityWithIdInIdProperty, string>(
             'some/api',
             { create: { strategy: 'optimistic' } },
           );
@@ -275,14 +271,17 @@ describe('Rest Resource', () => {
 
       it('skips optimistic update if no id (or id creator) was provided', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+          resource = restResource<EntityWithIdInIdProperty, string>(
             'some/api',
             { create: { strategy: 'optimistic' } },
           );
         });
         await tick();
 
-        const consoleWarnSpy = jest.spyOn(console, 'warn');
+        const consoleWarnSpy = jest
+          .spyOn(console, 'warn')
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
 
         resource.create({
           name: 'Test Entity 3',
@@ -290,100 +289,171 @@ describe('Rest Resource', () => {
 
         expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
         expect(consoleWarnSpy).toHaveBeenCalledWith(
-          "[@angular-experts/resource]",
-          `Optimistic update can only be performed if the provided item has an ID. ID can be added manually or using "options.create.id.generator", Skip...`
+          '[@angular-experts/resource]',
+          `Optimistic update can only be performed if the provided item has an ID. ID can be added manually or using "options.create.id.generator", Skip...`,
         );
       });
 
-      // it('sets update loading and loading state while updating', async () => {
-      //   runInInjectionContext(injector, () => {
-      //     resource = restResource<EntityWithIdInIdProperty, 'string'>(
-      //       'some/api',
-      //     );
-      //   });
-      //   await tick();
-      //
-      //   expect(resource.loading()).toBe(false);
-      //   expect(resource.loadingRemove()).toBe(false);
-      //
-      //   resource.update({
-      //     ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
-      //     name: 'updated',
-      //   });
-      //
-      //   expect(resource.loading()).toBe(true);
-      //   expect(resource.loadingUpdate()).toBe(true);
-      //
-      //   await tick(20);
-      //
-      //   expect(resource.loading()).toBe(false);
-      //   expect(resource.loadingUpdate()).toBe(false);
-      // });
-      //
-      // it('handles error and reloads (pessimistic)', async () => {
-      //   mockPut.mockImplementation(() =>
-      //     throwError(() => new Error('404')).pipe(delay(10)),
-      //   );
-      //   runInInjectionContext(injector, () => {
-      //     resource = restResource<EntityWithIdInIdProperty, 'string'>(
-      //       'some/api',
-      //     );
-      //   });
-      //   await tick();
-      //
-      //   expect(resource.hasValues()).toBe(true);
-      //   expect(resource.values()?.length).toBe(2);
-      //
-      //   resource.update({
-      //     ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
-      //     name: 'updated',
-      //   });
-      //
-      //   await tick(20); // wait for delete to finish
-      //   await tick(); // wait for refresh to finish
-      //
-      //   expect(mockGet).toHaveBeenCalledTimes(2);
-      //   expect(resource.errorUpdate()).toEqual(new Error('404'));
-      //   expect(resource.values()?.[0]).toEqual(
-      //     TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
-      //   );
-      // });
-      //
-      // it('handles error and reverts updated value (optimistic)', async () => {
-      //   mockPut.mockImplementation(() =>
-      //     throwError(() => new Error('404')).pipe(delay(10)),
-      //   );
-      //   runInInjectionContext(injector, () => {
-      //     resource = restResource<EntityWithIdInIdProperty, 'string'>(
-      //       'some/api',
-      //       {
-      //         update: { strategy: 'optimistic' },
-      //       },
-      //     );
-      //   });
-      //   await tick();
-      //
-      //   expect(resource.hasValues()).toBe(true);
-      //   expect(resource.values()?.length).toBe(2);
-      //
-      //   resource.update({ ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0], name: 'updated' });
-      //
-      //   await tick(20); // wait for delete to finish
-      //   await tick(); // wait for refresh to finish
-      //
-      //   expect(mockGet).toHaveBeenCalledTimes(1);
-      //   expect(resource.errorUpdate()).toEqual(new Error('404'));
-      //
-      //   expect(resource.values()?.length).toBe(2);
-      //   expect(resource.values()?.[0]).toEqual(
-      //     TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
-      //   );
-      // });
+      it('sets crate loading and loading state while creating', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
+        });
+        await tick();
+
+        expect(resource.loading()).toBe(false);
+        expect(resource.loadingCreate()).toBe(false);
+
+        resource.create({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+
+        expect(resource.loading()).toBe(true);
+        expect(resource.loadingCreate()).toBe(true);
+
+        await tick(20);
+
+        expect(resource.loading()).toBe(false);
+        expect(resource.loadingCreate()).toBe(false);
+      });
+
+      it('handles error and reloads (pessimistic)', async () => {
+        mockPost.mockImplementation(() =>
+          timer(10).pipe(mergeMap(() => throwError(() => new Error('404')))),
+        );
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.create({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(2);
+        expect(resource.errorCreate()).toEqual(new Error('404'));
+        expect(resource.values()?.length).toBe(2);
+      });
+
+      it('handles error and reverts created value (optimistic)', async () => {
+        mockPost.mockImplementation(() =>
+          timer(10).pipe(mergeMap(() => throwError(() => new Error('404')))),
+        );
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            {
+              create: { strategy: 'optimistic' },
+            },
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.create({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+
+        expect(resource.values()?.length).toBe(3);
+
+        await tick(20); // wait for delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(1);
+        expect(resource.errorCreate()).toEqual(new Error('404'));
+
+        expect(resource.values()?.length).toBe(2);
+      });
+
+      it('creates an item and uses id generator (generator)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            {
+              strategy: 'optimistic',
+              create: {
+                id: {
+                  generator: () => '3',
+                },
+              },
+            },
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.create({
+          name: 'Test Entity 3',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(mockGet).toHaveBeenCalledTimes(1);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(3);
+        expect(resource.values()?.[2]).toEqual({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+      });
+
+      it('creates an item and uses id generator (generator + setter)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            {
+              strategy: 'optimistic',
+              create: {
+                id: {
+                  generator: () => '3',
+                  setter: (id, item) => {
+                    item.id = id;
+                  },
+                },
+              },
+            },
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.create({
+          name: 'Test Entity 3',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(mockGet).toHaveBeenCalledTimes(1);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(3);
+        expect(resource.values()?.[2]).toEqual({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+      });
     });
 
     describe('Update', () => {
       let resource: ReturnType<
-        typeof restResource<EntityWithIdInIdProperty, 'string'>
+        typeof restResource<EntityWithIdInIdProperty, string>
       >;
       let data: EntityWithIdInIdProperty[];
 
@@ -406,9 +476,7 @@ describe('Rest Resource', () => {
 
       it('updates first item and reloads the collection (pessimistic)', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
-            'some/api',
-          );
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
         });
         await tick();
 
@@ -435,7 +503,7 @@ describe('Rest Resource', () => {
 
       it('updates second item and does not reload collection (optimistic)', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+          resource = restResource<EntityWithIdInIdProperty, string>(
             'some/api',
             { update: { strategy: 'optimistic' } },
           );
@@ -465,14 +533,12 @@ describe('Rest Resource', () => {
 
       it('sets update loading and loading state while updating', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
-            'some/api',
-          );
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
         });
         await tick();
 
         expect(resource.loading()).toBe(false);
-        expect(resource.loadingRemove()).toBe(false);
+        expect(resource.loadingUpdate()).toBe(false);
 
         resource.update({
           ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
@@ -490,12 +556,10 @@ describe('Rest Resource', () => {
 
       it('handles error and reloads (pessimistic)', async () => {
         mockPut.mockImplementation(() =>
-          throwError(() => new Error('404')).pipe(delay(10)),
+          timer(10).pipe(mergeMap(() => throwError(() => new Error('404')))),
         );
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
-            'some/api',
-          );
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
         });
         await tick();
 
@@ -519,10 +583,10 @@ describe('Rest Resource', () => {
 
       it('handles error and reverts updated value (optimistic)', async () => {
         mockPut.mockImplementation(() =>
-          throwError(() => new Error('404')).pipe(delay(10)),
+          timer(10).pipe(mergeMap(() => throwError(() => new Error('404')))),
         );
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+          resource = restResource<EntityWithIdInIdProperty, string>(
             'some/api',
             {
               update: { strategy: 'optimistic' },
@@ -554,7 +618,7 @@ describe('Rest Resource', () => {
 
     describe('Remove', () => {
       let resource: ReturnType<
-        typeof restResource<EntityWithIdInIdProperty, 'string'>
+        typeof restResource<EntityWithIdInIdProperty, string>
       >;
       let data: EntityWithIdInIdProperty[];
 
@@ -563,20 +627,22 @@ describe('Rest Resource', () => {
         mockGet.mockImplementation(() => of(data));
         mockDelete.mockImplementation((...args) => {
           const url = args[0] as string;
-          if (url.includes('/1')) {
-            data = data.filter((item) => item.id !== '1');
-          } else if (url.includes('/2')) {
-            data = data.filter((item) => item.id !== '2');
-          }
-          return of(undefined).pipe(delay(10));
+          return of(undefined).pipe(
+            delay(10),
+            tap(() => {
+              if (url.includes('/1')) {
+                data = data.filter((item) => item.id !== '1');
+              } else if (url.includes('/2')) {
+                data = data.filter((item) => item.id !== '2');
+              }
+            }),
+          );
         });
       });
 
       it('removes first item and reloads collection (pessimistic)', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
-            'some/api',
-          );
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
         });
         await tick();
 
@@ -599,7 +665,7 @@ describe('Rest Resource', () => {
 
       it('removes first item and does not reload collection (optimistic)', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+          resource = restResource<EntityWithIdInIdProperty, string>(
             'some/api',
             { remove: { strategy: 'optimistic' } },
           );
@@ -625,7 +691,7 @@ describe('Rest Resource', () => {
 
       it('sets remove loading and loading state while removing', async () => {
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+          resource = restResource<EntityWithIdInIdProperty, string>(
             'some/api',
             { remove: { strategy: 'optimistic' } },
           );
@@ -648,12 +714,10 @@ describe('Rest Resource', () => {
 
       it('handles error and reloads (pessimistic)', async () => {
         mockDelete.mockImplementation(() =>
-          throwError(() => new Error('404')).pipe(delay(10)),
+          timer(10).pipe(mergeMap(() => throwError(() => new Error('404')))),
         );
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
-            'some/api',
-          );
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
         });
         await tick();
 
@@ -671,10 +735,10 @@ describe('Rest Resource', () => {
 
       it('handles error and reverts removed value (optimistic)', async () => {
         mockDelete.mockImplementation(() =>
-          throwError(() => new Error('404')).pipe(delay(10)),
+          timer(10).pipe(mergeMap(() => throwError(() => new Error('404')))),
         );
         runInInjectionContext(injector, () => {
-          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+          resource = restResource<EntityWithIdInIdProperty, string>(
             'some/api',
             {
               remove: { strategy: 'optimistic' },
@@ -696,6 +760,158 @@ describe('Rest Resource', () => {
 
         expect(resource.values()?.length).toBe(2);
       });
+
+      it('removes multiple items (concat - default)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>('some/api');
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]);
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1]);
+
+        await tick(12); // wait for 1st delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(2);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(1);
+
+        await tick(20); // wait for 2nd delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(3);
+
+        expect(resource.hasValues()).toBe(false);
+        expect(resource.values()?.length).toBe(0);
+      });
+
+      it('removes multiple items (merge)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            {
+              remove: {
+                behavior: 'merge',
+              },
+            },
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]);
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1]);
+
+        await tick(20); // wait for delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(2);
+
+        expect(resource.hasValues()).toBe(false);
+        expect(resource.values()?.length).toBe(0);
+      });
+
+      it('removes multiple items (switch)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            {
+              remove: {
+                behavior: 'switch',
+              },
+            },
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]);
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1]);
+
+        await tick(20); // wait for delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(2);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(1);
+        expect(resource.values()).toEqual([
+          TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0],
+        ]);
+      });
+
+      it('removes multiple items (exhaust)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            {
+              remove: {
+                behavior: 'exhaust',
+              },
+            },
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[0]);
+        resource.remove(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1]);
+
+        await tick(20); // wait for delete to finish
+        await tick(); // wait for refresh to finish
+
+        expect(mockGet).toHaveBeenCalledTimes(2);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(1);
+        expect(resource.values()).toEqual([
+          TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
+        ]);
+      });
+    });
+  });
+
+  describe('Other options', () => {
+    let resource: ReturnType<
+      typeof restResource<EntityWithIdInIdProperty, string>
+    >;
+
+    beforeEach(() => {
+      mockGet.mockReturnValue(of(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY));
+    });
+
+    it('verbose', async () => {
+      runInInjectionContext(injector, () => {
+        resource = restResource<EntityWithIdInIdProperty, string>('some/api', {
+          verbose: true,
+        });
+      });
+
+      const consoleDebugSpy = jest
+        .spyOn(console, 'debug')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .mockImplementation(() => {});
+
+      await tick();
+
+      expect(resource.hasValues()).toBe(true);
+      expect(consoleDebugSpy).toHaveBeenCalledTimes(1);
+      expect(consoleDebugSpy).toHaveBeenCalledWith(
+        '[@angular-experts/resource]',
+        'Read (Angular resource)',
+        { fullUrl: 'some/api', request: '' },
+      );
     });
   });
 });
