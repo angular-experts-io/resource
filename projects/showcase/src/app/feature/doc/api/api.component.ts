@@ -412,7 +412,7 @@ export class ApiComponent {
             name: 'values',
             type: 'Signal<T[]>',
             description:
-              'Signal containing the array of items returned from the API.',
+              'Signal containing the array of items returned from the API. Implemented using linkedSignal to maintain previous values when source is undefined during reload because the params have changed (to prevent jumpy UI)',
           },
           {
             name: 'value',
