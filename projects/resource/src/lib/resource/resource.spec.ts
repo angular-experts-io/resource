@@ -34,6 +34,10 @@ describe('Rest Resource', () => {
     injector = TestBed.inject(Injector);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   describe('CRUD', () => {
     describe('Read', () => {
       let resource: ReturnType<
@@ -239,36 +243,58 @@ describe('Rest Resource', () => {
         });
       });
 
-      // it('updates second item and does not reload collection (optimistic)', async () => {
-      //   runInInjectionContext(injector, () => {
-      //     resource = restResource<EntityWithIdInIdProperty, 'string'>(
-      //       'some/api',
-      //       { update: { strategy: 'optimistic' } },
-      //     );
-      //   });
-      //   await tick();
-      //
-      //   expect(resource.hasValues()).toBe(true);
-      //   expect(resource.values()?.length).toBe(2);
-      //
-      //   resource.update({
-      //     ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
-      //     name: 'updated',
-      //   });
-      //
-      //   await tick(20); // wait for delete to finish
-      //   await tick(); // refresh doesn't happen but still wait to catch potential errors
-      //
-      //   expect(mockGet).toHaveBeenCalledTimes(1);
-      //
-      //   expect(resource.hasValues()).toBe(true);
-      //   expect(resource.values()?.length).toBe(2);
-      //   expect(resource.values()?.[1]).toEqual({
-      //     ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
-      //     name: 'updated',
-      //   });
-      // });
-      //
+      it('creates an item and does not reload collection (optimistic)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+            'some/api',
+            { create: { strategy: 'optimistic' } },
+          );
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.create({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(mockGet).toHaveBeenCalledTimes(1);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(3);
+        expect(resource.values()?.[2]).toEqual({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+      });
+
+      it('skips optimistic update if no id (or id creator) was provided', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, 'string'>(
+            'some/api',
+            { create: { strategy: 'optimistic' } },
+          );
+        });
+        await tick();
+
+        const consoleWarnSpy = jest.spyOn(console, 'warn');
+
+        resource.create({
+          name: 'Test Entity 3',
+        });
+
+        expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          "[@angular-experts/resource]",
+          `Optimistic update can only be performed if the provided item has an ID. ID can be added manually or using "options.create.id.generator", Skip...`
+        );
+      });
+
       // it('sets update loading and loading state while updating', async () => {
       //   runInInjectionContext(injector, () => {
       //     resource = restResource<EntityWithIdInIdProperty, 'string'>(
