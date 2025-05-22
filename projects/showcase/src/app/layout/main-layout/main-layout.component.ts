@@ -77,7 +77,7 @@ export default class MainLayoutComponent {
     },
     {
       icon: 'npm',
-      url: 'https://www.npmjs.com/package/@angular-experts-io/resource',
+      url: 'https://www.npmjs.com/package/@angular-experts/resource',
     },
   ]);
 
