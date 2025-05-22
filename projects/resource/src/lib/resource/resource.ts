@@ -25,11 +25,11 @@ const LOG_PREFIX = `[@angular-experts/resource]`;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function restResource<T, ID, E = any>(
   apiEndpoint: string,
-  options?: RestResourceOptions<T, ID>,
+  options: RestResourceOptions<T, ID> = {},
 ) {
   const http = inject(HttpClient);
 
-  const strategy = options?.strategy ?? 'pessimistic';
+  const strategy = options.strategy ?? 'pessimistic';
 
   const loadingCreate = signal(false);
   const loadingUpdate = signal(false);
@@ -39,7 +39,7 @@ export function restResource<T, ID, E = any>(
   const errorRemove = signal<E | undefined>(undefined);
 
   const resource = rxResource({
-    request: () => options?.params?.() ?? '',
+    request: () => options.params?.() ?? '',
     loader: ({ request }) => {
       const fullUrl = `${apiEndpoint}${request}`;
       verbose('Read (Angular resource)', { request, fullUrl });
@@ -73,10 +73,10 @@ export function restResource<T, ID, E = any>(
   const create = streamify<[item: Partial<T>]>((stream) =>
     stream.pipe(
       map(([item]) => {
-        if (options?.create?.id?.generator) {
-          const newId = options?.create?.id.generator();
-          if (options?.create?.id?.setter) {
-            options?.create?.id?.setter(newId, item);
+        if (options.create?.id?.generator) {
+          const newId = options.create?.id.generator();
+          if (options.create?.id?.setter) {
+            options.create?.id?.setter(newId, item);
           } else {
             (item as unknown as { id: ID }).id = newId;
           }
@@ -87,7 +87,7 @@ export function restResource<T, ID, E = any>(
         loadingCreate.set(true);
         if (isOptimistic('create', options)) {
           if (
-            !options?.create?.id?.generator &&
+            !options.create?.id?.generator &&
             !getItemId(item as T, options)
           ) {
             console.warn(
@@ -99,7 +99,7 @@ export function restResource<T, ID, E = any>(
           resource.update((prev) => [...(prev ?? []), item as T]);
         }
       }),
-      behaviorToOperator(options?.create?.behavior)(([item]) =>
+      behaviorToOperator(options.create?.behavior)(([item]) =>
         http.post(apiEndpoint, item).pipe(
           catchError((err) => {
             errorCreate.set(err);
@@ -141,7 +141,7 @@ export function restResource<T, ID, E = any>(
         }
         return { item };
       }),
-      behaviorToOperator(options?.update?.behavior)(
+      behaviorToOperator(options.update?.behavior)(
         ({ item, prevVersionOfItem }) => {
           const updatedItemId = getItemId(item!, options);
           return http
@@ -149,7 +149,7 @@ export function restResource<T, ID, E = any>(
             .pipe(
               catchError((err) => {
                 errorUpdate.set(err);
-                if ((options?.update?.strategy ?? strategy) === 'optimistic') {
+                if ((options.update?.strategy ?? strategy) === 'optimistic') {
                   resource.update((prev) =>
                     prev?.map((prevItem) => {
                       return getItemId(prevItem, options) === updatedItemId
@@ -180,8 +180,8 @@ export function restResource<T, ID, E = any>(
           );
         }
       }),
-      behaviorToOperator(options?.remove?.behavior)(([item]) =>
-        http.delete(`${apiEndpoint}/${getItemId(item)}`).pipe(
+      behaviorToOperator(options.remove?.behavior)(([item]) =>
+        http.delete(`${apiEndpoint}/${getItemId(item, options)}`).pipe(
           catchError((err) => {
             errorRemove.set(err);
             if (isOptimistic('remove', options)) {
@@ -198,34 +198,34 @@ export function restResource<T, ID, E = any>(
     ),
   );
 
-  function getItemId(item: T, options?: RestResourceOptions<T, ID>): ID {
-    return options?.idSelector?.(item) ?? (item as unknown as { id: ID }).id;
+  function getItemId(item: T, options: RestResourceOptions<T, ID>): ID {
+    return options.idSelector?.(item) ?? (item as unknown as { id: ID }).id;
   }
 
   function isOptimistic(
     requestType: RequestType,
-    options?: RestResourceOptions<T, ID>,
+    options: RestResourceOptions<T, ID>,
   ) {
-    return (options?.[requestType]?.strategy ?? strategy) === 'optimistic';
+    return (options[requestType]?.strategy ?? strategy) === 'optimistic';
   }
 
   function reloadIfPessimisticOrHasParams(
     requestType: RequestType,
     resource: ResourceRef<T[] | undefined>,
-    options?: RestResourceOptions<T, ID>,
+    options: RestResourceOptions<T, ID>,
   ) {
     if (
-      (options?.[requestType]?.strategy ??
-        options?.strategy ??
+      (options[requestType]?.strategy ??
+        options.strategy ??
         'pessimistic') === 'pessimistic' ||
-      options?.params
+      options.params
     ) {
       resource.reload();
     }
   }
 
   function verbose(...args: unknown[]) {
-    if (options?.verbose) {
+    if (options.verbose) {
       console.debug(LOG_PREFIX, ...args);
     }
   }

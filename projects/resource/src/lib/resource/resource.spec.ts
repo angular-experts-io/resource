@@ -883,15 +883,15 @@ describe('Rest Resource', () => {
   });
 
   describe('Other options', () => {
-    let resource: ReturnType<
-      typeof restResource<EntityWithIdInIdProperty, string>
-    >;
 
     beforeEach(() => {
       mockGet.mockReturnValue(of(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY));
     });
 
     it('verbose', async () => {
+      let resource: ReturnType<
+        typeof restResource<EntityWithIdInIdProperty, string>
+      >;
       runInInjectionContext(injector, () => {
         resource = restResource<EntityWithIdInIdProperty, string>('some/api', {
           verbose: true,
@@ -912,6 +912,24 @@ describe('Rest Resource', () => {
         'Read (Angular resource)',
         { fullUrl: 'some/api', request: '' },
       );
+    });
+
+    it('idSelector', async () => {
+      let resource: ReturnType<
+        typeof restResource<EntityWithIdInOtherIdProperty, string>
+      >;
+      runInInjectionContext(injector, () => {
+        resource = restResource<EntityWithIdInOtherIdProperty, string>('some/api', {
+          idSelector: (item) => item.otherId,
+        });
+      });
+
+      await tick();
+
+      resource.remove(TEST_ENTITIES_WITH_ID_IN_OTHER_ID_PROPERTY[0]);
+
+      expect(mockDelete).toHaveBeenCalledTimes(1);
+      expect(mockDelete).toHaveBeenCalledWith('some/api/1');
     });
   });
 });
