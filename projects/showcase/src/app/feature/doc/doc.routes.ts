@@ -7,7 +7,7 @@ export default <Routes>[
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'basic',
+    redirectTo: 'api',
   },
   {
     path: '',
