@@ -42,16 +42,10 @@ interface ApiType {
   values?: string[];
 }
 
-
 @Component({
   selector: 'showcase-api',
   standalone: true,
-  imports: [
-    MatCardModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatListModule,
-  ],
+  imports: [MatCardModule, MatDividerModule, MatExpansionModule, MatListModule],
   template: `
     <div class="api-container">
       <h1>&#64;angular-experts/resource API</h1>
@@ -75,9 +69,14 @@ interface ApiType {
                   <div class="param-header">Description</div>
 
                   @for (param of method.parameters; track param.name) {
-                    <div class="param-name">{{ param.name }}{{ param.optional ? '?' : '' }}</div>
+                    <div class="param-name">
+                      {{ param.name }}{{ param.optional ? '?' : '' }}
+                    </div>
                     <div class="param-type">{{ param.type }}</div>
-                    <div class="param-description" [innerHTML]="param.description"></div>
+                    <div
+                      class="param-description"
+                      [innerHTML]="param.description"
+                    ></div>
                   }
                 </div>
               }
@@ -88,10 +87,16 @@ interface ApiType {
                 <div class="param-header">Description</div>
 
                 <div class="param-type">{{ method.returns.type }}</div>
-                <div class="param-description" [innerHTML]="method.returns.description"></div>
+                <div
+                  class="param-description"
+                  [innerHTML]="method.returns.description"
+                ></div>
               </div>
 
-              @if (method.returns.properties && method.returns.properties.length > 0) {
+              @if (
+                method.returns.properties &&
+                method.returns.properties.length > 0
+              ) {
                 <h4>Return Object Properties</h4>
                 <div class="properties-grid">
                   <div class="param-header">Name</div>
@@ -101,7 +106,10 @@ interface ApiType {
                   @for (prop of method.returns.properties; track prop.name) {
                     <div class="param-name">{{ prop.name }}</div>
                     <div class="param-type">{{ prop.type }}</div>
-                    <div class="param-description" [innerHTML]="prop.description"></div>
+                    <div
+                      class="param-description"
+                      [innerHTML]="prop.description"
+                    ></div>
                   }
                 </div>
               }
@@ -131,9 +139,14 @@ interface ApiType {
               <div class="param-header">Description</div>
 
               @for (prop of interface.properties; track prop.name) {
-                <div class="param-name">{{ prop.name }}{{ prop.optional ? '?' : '' }}</div>
+                <div class="param-name">
+                  {{ prop.name }}{{ prop.optional ? '?' : '' }}
+                </div>
                 <div class="param-type">{{ prop.type }}</div>
-                <div class="param-description" [innerHTML]="prop.description"></div>
+                <div
+                  class="param-description"
+                  [innerHTML]="prop.description"
+                ></div>
               }
             </div>
           </mat-expansion-panel>
@@ -182,7 +195,8 @@ interface ApiType {
       margin-bottom: 2rem;
     }
 
-    h1, h2 {
+    h1,
+    h2 {
       margin-bottom: 1rem;
     }
 
@@ -197,7 +211,8 @@ interface ApiType {
       font-weight: 500;
     }
 
-    mat-card, mat-expansion-panel {
+    mat-card,
+    mat-expansion-panel {
       margin-bottom: 1rem;
     }
 
@@ -230,7 +245,9 @@ interface ApiType {
     }
 
     /* Grid layouts for tabular data */
-    .params-grid, .returns-grid, .properties-grid {
+    .params-grid,
+    .returns-grid,
+    .properties-grid {
       display: grid;
       margin-bottom: 1.5rem;
       border-radius: 4px;
@@ -297,133 +314,187 @@ interface ApiType {
     }
 
     /* Format multi-line descriptions with proper line breaks */
-    .param-description ul, .description ul {
+    .param-description ul,
+    .description ul {
       margin-top: 0.5rem;
       margin-bottom: 0.5rem;
       padding-left: 1.5rem;
     }
 
-    .param-description li, .description li {
+    .param-description li,
+    .description li {
       margin-bottom: 0.5rem;
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApiComponent {
   methods = signal<ApiMethod[]>([
     {
       name: 'restResource',
-      description: 'Creates a resource for managing CRUD operations with a REST API endpoint.',
-      signature: 'restResource<T, ID>(apiEndpoint: string, options?: CrudResourceOptions<T, ID>)',
+      description:
+        'Creates a resource for managing CRUD operations with a REST API endpoint.',
+      signature:
+        'restResource<T, ID, E = any>(apiEndpoint: string, options?: RestResourceOptions<T, ID>)',
       parameters: [
         {
           name: 'apiEndpoint',
           type: 'string',
-          description: 'The base URL for the REST API endpoint.'
+          description: 'The base URL for the REST API endpoint.',
         },
         {
           name: 'options',
-          type: 'CrudResourceOptions<T, ID>',
+          type: 'RestResourceOptions<T, ID>',
           description: 'Configuration options for the resource.',
-          optional: true
-        }
+          optional: true,
+        },
       ],
       returns: {
         type: 'Object',
-        description: 'An object containing loading states, error states, data signals, and CRUD methods.',
+        description:
+          'An object containing loading states, error states, data signals, and CRUD methods.',
         properties: [
           {
             name: 'loadingInitial',
             type: 'Signal<boolean>',
-            description: 'Signal indicating whether the initial data is being loaded.'
+            description:
+              'Signal indicating whether the initial data is being loaded.',
           },
           {
             name: 'loading',
             type: 'Signal<boolean>',
-            description: 'Signal indicating whether any operation is in progress.'
+            description:
+              'Signal indicating whether any operation is in progress.',
           },
           {
             name: 'loadingCreate',
             type: 'Signal<boolean>',
-            description: 'Signal indicating whether a create operation is in progress.'
+            description:
+              'Signal indicating whether a create operation is in progress.',
           },
           {
             name: 'loadingUpdate',
             type: 'Signal<boolean>',
-            description: 'Signal indicating whether an update operation is in progress.'
+            description:
+              'Signal indicating whether an update operation is in progress.',
           },
           {
             name: 'loadingRemove',
             type: 'Signal<boolean>',
-            description: 'Signal indicating whether a remove operation is in progress.'
+            description:
+              'Signal indicating whether a remove operation is in progress.',
           },
           {
             name: 'errorCreate',
-            type: 'Signal<string>',
-            description: 'Signal containing the error message from the last create operation, if any.'
+            type: 'Signal<E | undefined>',
+            description:
+              'Signal containing the error from the last create operation, if any.',
           },
           {
             name: 'errorUpdate',
-            type: 'Signal<string>',
-            description: 'Signal containing the error message from the last update operation, if any.'
+            type: 'Signal<E | undefined>',
+            description:
+              'Signal containing the error from the last update operation, if any.',
           },
           {
             name: 'errorRemove',
-            type: 'Signal<string>',
-            description: 'Signal containing the error message from the last remove operation, if any.'
+            type: 'Signal<E | undefined>',
+            description:
+              'Signal containing the error from the last remove operation, if any.',
+          },
+          {
+            name: 'errorRead',
+            type: 'Signal<E | undefined>',
+            description:
+              'Signal containing the error from the last read operation, if any.',
           },
           {
             name: 'values',
             type: 'Signal<T[]>',
-            description: 'Signal containing the array of items returned from the API.'
+            description:
+              'Signal containing the array of items returned from the API.',
           },
           {
             name: 'value',
             type: 'Signal<T | undefined>',
-            description: 'Signal containing the first item from the values array, if there is only one item.'
+            description:
+              'Signal containing the first item from the values array, if there is only one item.',
+          },
+          {
+            name: 'hasValue',
+            type: 'Signal<boolean>',
+            description:
+              'Signal indicating whether the resource has a single value.',
+          },
+          {
+            name: 'hasValues',
+            type: 'Signal<boolean>',
+            description:
+              'Signal indicating whether the resource has any values.',
           },
           {
             name: 'create',
             type: '(item: Partial<T>) => void',
-            description: 'Method to create a new item.'
+            description: 'Method to create a new item.',
           },
           {
             name: 'update',
             type: '(item: T) => void',
-            description: 'Method to update an existing item.'
+            description: 'Method to update an existing item.',
           },
           {
             name: 'remove',
             type: '(item: T) => void',
-            description: 'Method to remove an existing item.'
-          }
-        ]
-      }
-    }
+            description: 'Method to remove an existing item.',
+          },
+          {
+            name: 'destroy',
+            type: '() => void',
+            description:
+              'Method to destroy the resource and clean up subscriptions.',
+          },
+          {
+            name: 'reload',
+            type: '() => void',
+            description: 'Method to reload the resource data.',
+          },
+        ],
+      },
+    },
   ]);
 
   interfaces = signal<ApiInterface[]>([
     {
-      name: 'CrudResourceOptions<T, ID>',
-      description: 'Configuration options for a CRUD resource.',
+      name: 'RestResourceOptions<T, ID>',
+      description: 'Configuration options for a REST resource.',
       properties: [
+        {
+          name: 'verbose',
+          type: 'boolean',
+          description:
+            "Whether to log verbose information to the console. This is useful for debugging and understanding the resource's behavior. Default is false.",
+          optional: true,
+        },
         {
           name: 'params',
           type: '() => string | undefined',
-          description: 'A reactive function which determines the request to be made. Whenever the params change, the loader will be triggered to fetch a new value for the resource.',
-          optional: true
+          description:
+            'A reactive function which determines the request to be made. Whenever the params change, the loader will be triggered to fetch a new value for the resource.',
+          optional: true,
         },
         {
           name: 'idSelector',
           type: '(item: T) => ID',
-          description: 'Function to extract the ID from an item when the ID is not stored in the `id` field. Used to identify items for update and remove operations.',
-          optional: true
+          description:
+            'Function to extract the ID from an item when the ID is not stored in the `id` field. Used to identify items for update and remove operations.',
+          optional: true,
         },
         {
           name: 'strategy',
           type: 'Strategy',
-          description: 'The default strategy for the resource for every request type, it can be overridden by the request type specific strategy. Default is "pessimistic".',
-          optional: true
+          description:
+            'The default strategy for the resource for every request type, it can be overridden by the request type specific strategy. Default is "pessimistic".',
+          optional: true,
         },
         {
           name: 'create',
@@ -433,7 +504,7 @@ export class ApiComponent {
 <li><strong>strategy</strong>: Determines whether changes are applied optimistically or pessimistically (default: global strategy)</li>
 <li><strong>id</strong>: Object for ID generation with generator and optional setter functions</li>
 </ul>`,
-          optional: true
+          optional: true,
         },
         {
           name: 'update',
@@ -442,7 +513,7 @@ export class ApiComponent {
 <li><strong>behavior</strong>: Defines how update requests are handled when multiple requests are made (default: 'concat')</li>
 <li><strong>strategy</strong>: Determines whether changes are applied optimistically or pessimistically (default: global strategy)</li>
 </ul>`,
-          optional: true
+          optional: true,
         },
         {
           name: 'remove',
@@ -451,9 +522,9 @@ export class ApiComponent {
 <li><strong>behavior</strong>: Defines how remove requests are handled when multiple requests are made (default: 'concat')</li>
 <li><strong>strategy</strong>: Determines whether changes are applied optimistically or pessimistically (default: global strategy)</li>
 </ul>`,
-          optional: true
-        }
-      ]
+          optional: true,
+        },
+      ],
     },
     {
       name: 'ResourceRef<T>',
@@ -462,43 +533,46 @@ export class ApiComponent {
         {
           name: 'value',
           type: 'Signal<T | undefined>',
-          description: 'Signal containing the current value of the resource.'
+          description: 'Signal containing the current value of the resource.',
         },
         {
           name: 'isLoading',
           type: 'Signal<boolean>',
-          description: 'Signal indicating whether the resource is currently loading.'
+          description:
+            'Signal indicating whether the resource is currently loading.',
         },
         {
           name: 'reload',
           type: '() => void',
-          description: 'Method to reload the resource data.'
+          description: 'Method to reload the resource data.',
         },
         {
           name: 'update',
           type: '(updater: (value: T | undefined) => T | undefined) => void',
-          description: 'Method to update the resource value using an updater function.'
-        }
-      ]
-    }
+          description:
+            'Method to update the resource value using an updater function.',
+        },
+      ],
+    },
   ]);
 
   types = signal<ApiType[]>([
     {
       name: 'RequestType',
       description: 'Type of request operation.',
-      values: ['create', 'update', 'remove']
+      values: ['create', 'update', 'remove'],
     },
     {
       name: 'Behavior',
-      description: 'Defines how requests are handled when multiple requests are made. Controls the RxJS flattening operator used for the HTTP request.',
-      values: ['concat', 'merge', 'switch', 'exhaust']
+      description:
+        'Defines how requests are handled when multiple requests are made. Controls the RxJS flattening operator used for the HTTP request.',
+      values: ['concat', 'merge', 'switch', 'exhaust'],
     },
     {
       name: 'Strategy',
-      description: 'Determines whether changes are applied optimistically (before server confirmation) or pessimistically (after server confirmation).',
-      values: ['optimistic', 'pessimistic']
-    }
+      description:
+        'Determines whether changes are applied optimistically (before server confirmation) or pessimistically (after server confirmation).',
+      values: ['optimistic', 'pessimistic'],
+    },
   ]);
-
 }

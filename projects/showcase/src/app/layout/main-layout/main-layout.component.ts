@@ -1,10 +1,11 @@
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import {
   ChangeDetectionStrategy,
-  Component, effect,
+  Component,
+  effect,
   inject,
   linkedSignal,
-  signal
+  signal,
 } from '@angular/core';
 
 import {
@@ -131,5 +132,5 @@ export default class MainLayoutComponent {
       this.#document.documentElement.classList.remove('dark-mode');
       this.#document.documentElement.classList.add('light-mode');
     }
-  })
+  });
 }

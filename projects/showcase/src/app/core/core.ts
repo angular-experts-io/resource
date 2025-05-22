@@ -1,4 +1,8 @@
-import { provideRouter, Routes, withComponentInputBinding } from '@angular/router';
+import {
+  provideRouter,
+  Routes,
+  withComponentInputBinding,
+} from '@angular/router';
 import {
   provideHttpClient,
   withFetch,

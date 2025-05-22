@@ -121,10 +121,15 @@ export function restResource<T, ID, E = any>(
 
   const update = streamify<[item: T]>((stream) =>
     stream.pipe(
-      tap(([item]) => {
+      map(([item]) => {
         loadingUpdate.set(true);
         if (isOptimistic('update', options)) {
           const updatedItemId = getItemId(item, options);
+          const prevVersionOfItem = resource
+            .value()
+            ?.find(
+              (prevItem) => getItemId(prevItem, options) === updatedItemId,
+            );
           resource.update((prev) =>
             prev?.map((prevItem) => {
               return getItemId(prevItem, options) === updatedItemId
@@ -132,28 +137,32 @@ export function restResource<T, ID, E = any>(
                 : prevItem;
             }),
           );
+          return { item, prevVersionOfItem };
         }
+        return { item };
       }),
-      behaviorToOperator(options?.update?.behavior)(([item]) => {
-        const updatedItemId = getItemId(item, options);
-        return http
-          .put(`${apiEndpoint}/${updatedItemId?.toString()}`, item)
-          .pipe(
-            catchError((err) => {
-              errorUpdate.set(err);
-              if ((options?.update?.strategy ?? strategy) === 'optimistic') {
-                resource.update((prev) =>
-                  prev?.map((prevItem) => {
-                    return getItemId(prevItem, options) === updatedItemId
-                      ? item
-                      : prevItem;
-                  }),
-                );
-              }
-              return [undefined];
-            }),
-          );
-      }),
+      behaviorToOperator(options?.update?.behavior)(
+        ({ item, prevVersionOfItem }) => {
+          const updatedItemId = getItemId(item!, options);
+          return http
+            .put(`${apiEndpoint}/${updatedItemId?.toString()}`, item)
+            .pipe(
+              catchError((err) => {
+                errorUpdate.set(err);
+                if ((options?.update?.strategy ?? strategy) === 'optimistic') {
+                  resource.update((prev) =>
+                    prev?.map((prevItem) => {
+                      return getItemId(prevItem, options) === updatedItemId
+                        ? prevVersionOfItem!
+                        : prevItem;
+                    }),
+                  );
+                }
+                return [undefined];
+              }),
+            );
+        },
+      ),
       tap(() => {
         reloadIfPessimisticOrHasParams('update', resource, options);
         loadingUpdate.set(false);

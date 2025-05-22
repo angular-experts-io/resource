@@ -8,17 +8,16 @@ describe('TodoItemComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TodoItemComponent]
-    })
-    .compileComponents();
+      imports: [TodoItemComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TodoItemComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('todo', {
       id: '1',
       description: 'Test Todo',
-      completed: false
-    })
+      completed: false,
+    });
     fixture.detectChanges();
   });
 

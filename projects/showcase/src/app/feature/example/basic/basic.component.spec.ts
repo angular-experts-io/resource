@@ -11,9 +11,8 @@ describe('BasicComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BasicComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()]
-    })
-    .compileComponents();
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(BasicComponent);
     component = fixture.componentInstance;

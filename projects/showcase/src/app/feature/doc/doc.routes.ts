@@ -19,7 +19,7 @@ export default <Routes>[
           {
             label: 'API',
             route: 'api',
-          }
+          },
         ],
       },
     },
