@@ -9,8 +9,13 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { tap, catchError, map } from 'rxjs';
 
+import {
+  RestResourceOptions,
+  RequestType,
+  Strategy,
+  LOG_PREFIX,
+} from './resource.model';
 import { behaviorToOperator, streamify } from './resource.util';
-import { RestResourceOptions, RequestType, LOG_PREFIX } from './resource.model';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function restResource<T, ID, E = any>(
@@ -19,7 +24,7 @@ export function restResource<T, ID, E = any>(
 ) {
   const http = inject(HttpClient);
 
-  const strategy = options.strategy ?? 'pessimistic';
+  const strategy: Strategy = options.strategy ?? 'pessimistic';
 
   const loadingCreate = signal(false);
   const loadingUpdate = signal(false);
@@ -90,7 +95,19 @@ export function restResource<T, ID, E = any>(
         }
       }),
       behaviorToOperator(options.create?.behavior)(([item]) =>
-        http.post(apiEndpoint, item).pipe(
+        http.post<T | undefined | null>(apiEndpoint, item).pipe(
+          tap((createdItem) => {
+            if (isIncremental('create', options)) {
+              if (!createdItem) {
+                console.warn(
+                  LOG_PREFIX,
+                  `Incremental create request returned no item, this is unexpected, if your API does not return the created item, consider using "optimistic" strategy instead, Skip...`,
+                );
+              } else {
+                resource.update((prev) => [...(prev ?? []), createdItem]);
+              }
+            }
+          }),
           catchError((err) => {
             errorCreate.set(err);
             if (isOptimistic('create', options)) {
@@ -135,8 +152,28 @@ export function restResource<T, ID, E = any>(
         ({ item, prevVersionOfItem }) => {
           const updatedItemId = getItemId(item!, options);
           return http
-            .put(`${apiEndpoint}/${updatedItemId?.toString()}`, item)
+            .put<
+              T | null | undefined
+            >(`${apiEndpoint}/${updatedItemId?.toString()}`, item)
             .pipe(
+              tap((updatedItem) => {
+                if (isIncremental('update', options)) {
+                  if (!updatedItem) {
+                    console.warn(
+                      LOG_PREFIX,
+                      `Incremental update request returned no item, this is unexpected, if your API does not return the updated item, consider using "optimistic" strategy instead, Skip...`,
+                    );
+                  } else {
+                    resource.update((prev) =>
+                      prev?.map((prevItem) => {
+                        return getItemId(prevItem, options) === updatedItemId
+                          ? updatedItem
+                          : prevItem;
+                      }),
+                    );
+                  }
+                }
+              }),
               catchError((err) => {
                 errorUpdate.set(err);
                 if ((options.update?.strategy ?? strategy) === 'optimistic') {
@@ -171,15 +208,40 @@ export function restResource<T, ID, E = any>(
         }
       }),
       behaviorToOperator(options.remove?.behavior)(([item]) =>
-        http.delete(`${apiEndpoint}/${getItemId(item, options)}`).pipe(
-          catchError((err) => {
-            errorRemove.set(err);
-            if (isOptimistic('remove', options)) {
-              resource.update((prev) => [...(prev ?? []), item]);
-            }
-            return [undefined];
-          }),
-        ),
+        http
+          .delete<
+            T | ID | null | undefined
+          >(`${apiEndpoint}/${getItemId(item, options)}`)
+          .pipe(
+            tap((removedItemOrId) => {
+              if (isIncremental('remove', options)) {
+                if (removedItemOrId === null || removedItemOrId === undefined) {
+                  console.warn(
+                    LOG_PREFIX,
+                    `Incremental remove request returned no item or item ID, this is unexpected, if your API does not return the removed item or removed item ID, consider using "optimistic" strategy instead, Skip...`,
+                  );
+                } else {
+                  const removedItemId =
+                    typeof removedItemOrId === 'object'
+                      ? getItemId(removedItemOrId as T, options)
+                      : removedItemOrId as ID;
+                  resource.update((prev) =>
+                    prev?.filter(
+                      (prevItem) =>
+                        getItemId(prevItem, options) !== removedItemId,
+                    ),
+                  );
+                }
+              }
+            }),
+            catchError((err) => {
+              errorRemove.set(err);
+              if (isOptimistic('remove', options)) {
+                resource.update((prev) => [...(prev ?? []), item]);
+              }
+              return [undefined];
+            }),
+          ),
       ),
       tap(() => {
         reloadIfPessimisticOrHasParams('remove', resource, options);
@@ -197,6 +259,13 @@ export function restResource<T, ID, E = any>(
     options: RestResourceOptions<T, ID>,
   ) {
     return (options[requestType]?.strategy ?? strategy) === 'optimistic';
+  }
+
+  function isIncremental(
+    requestType: RequestType,
+    options: RestResourceOptions<T, ID>,
+  ) {
+    return (options[requestType]?.strategy ?? strategy) === 'incremental';
   }
 
   function reloadIfPessimisticOrHasParams(
@@ -258,7 +327,7 @@ export function restResource<T, ID, E = any>(
      * @returns Signal of a list of items or undefined (also returns undefined if resource has no items)
      */
     values,
-    hasValue: computed(() => !!value()),
+    hasValue: computed(() => value() !== null && value() !== undefined),
     hasValues: computed(() => !!values()?.length),
 
     // METHODS
@@ -271,8 +340,3 @@ export function restResource<T, ID, E = any>(
     destroy: resource.destroy.bind(resource),
   };
 }
-
-// TODO
-// single item mode? eg computed item if array is length of 1 else undefined ?
-// CQRS vs single item return mode ?
-// return back observable to notify completion (for orchestration)

@@ -5,6 +5,7 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { delay, mergeMap, of, tap, throwError, timer } from 'rxjs';
 
 import { restResource } from './resource';
+import clock = jasmine.clock;
 
 describe('Rest Resource', () => {
   let injector: Injector;
@@ -269,6 +270,41 @@ describe('Rest Resource', () => {
         });
       });
 
+      it('creates an item and adds it to collection (incremental)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            { create: { strategy: 'incremental' } },
+          );
+        });
+        mockPost.mockImplementation((...args) => {
+          const createdItem = args[1] as EntityWithIdInIdProperty;
+          return of(createdItem).pipe(delay(10));
+        });
+
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.create({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(mockGet).toHaveBeenCalledTimes(1);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(3);
+        expect(resource.values()?.[2]).toEqual({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+      });
+
       it('skips optimistic update if no id (or id creator) was provided', async () => {
         runInInjectionContext(injector, () => {
           resource = restResource<EntityWithIdInIdProperty, string>(
@@ -291,6 +327,38 @@ describe('Rest Resource', () => {
         expect(consoleWarnSpy).toHaveBeenCalledWith(
           '[@angular-experts/resource]',
           `Optimistic update can only be performed if the provided item has an ID. ID can be added manually or using "options.create.id.generator", Skip...`,
+        );
+      });
+
+      it('skips incremental update if no item was returned', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            { create: { strategy: 'incremental' } },
+          );
+        });
+        const consoleWarnSpy = jest
+          .spyOn(console, 'warn')
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
+        mockPost.mockImplementation(() => {
+          return of(undefined).pipe(delay(10));
+        });
+
+        await tick();
+
+        resource.create({
+          id: '3',
+          name: 'Test Entity 3',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          '[@angular-experts/resource]',
+          `Incremental create request returned no item, this is unexpected, if your API does not return the created item, consider using "optimistic" strategy instead, Skip...`,
         );
       });
 
@@ -531,6 +599,72 @@ describe('Rest Resource', () => {
         });
       });
 
+      it('updates second item and replaces is in the collection (incremental)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            { update: { strategy: 'incremental' } },
+          );
+        });
+        mockPut.mockImplementation((...args) => {
+          const updatedItem = args[1] as EntityWithIdInIdProperty;
+          return of(updatedItem).pipe(delay(10));
+        });
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.update({
+          ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
+          name: 'updated',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(mockGet).toHaveBeenCalledTimes(1);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+        expect(resource.values()?.[1]).toEqual({
+          ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
+          name: 'updated',
+        });
+      });
+
+      it('skips incremental update if no item was returned', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            { update: { strategy: 'incremental' } },
+          );
+        });
+        const consoleWarnSpy = jest
+          .spyOn(console, 'warn')
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
+        mockPut.mockImplementation(() => {
+          return of(undefined).pipe(delay(10));
+        });
+
+        await tick();
+
+        resource.update({
+          ...TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
+          name: 'updated',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          '[@angular-experts/resource]',
+          `Incremental update request returned no item, this is unexpected, if your API does not return the updated item, consider using "optimistic" strategy instead, Skip...`,
+        );
+      });
+
       it('sets update loading and loading state while updating', async () => {
         runInInjectionContext(injector, () => {
           resource = restResource<EntityWithIdInIdProperty, string>('some/api');
@@ -687,6 +821,69 @@ describe('Rest Resource', () => {
         expect(resource.values()).toEqual([
           TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY[1],
         ]);
+      });
+
+      it('removes an item and removes it from collection (incremental)', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            { remove: { strategy: 'incremental' } },
+          );
+        });
+        mockDelete.mockImplementation((...args) => {
+          const removedItemId = (args[0] as string).split('/').reverse()[0];
+          return of(removedItemId).pipe(delay(10));
+        });
+
+        await tick();
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(2);
+
+        resource.remove({
+          id: '2',
+          name: 'Test Entity 2',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(mockGet).toHaveBeenCalledTimes(1);
+
+        expect(resource.hasValues()).toBe(true);
+        expect(resource.values()?.length).toBe(1);
+      });
+
+      it('skips incremental update if no item was returned', async () => {
+        runInInjectionContext(injector, () => {
+          resource = restResource<EntityWithIdInIdProperty, string>(
+            'some/api',
+            { remove: { strategy: 'incremental' } },
+          );
+        });
+        const consoleWarnSpy = jest
+          .spyOn(console, 'warn')
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .mockImplementation(() => {});
+        mockPost.mockImplementation(() => {
+          return of(undefined).pipe(delay(10));
+        });
+
+        await tick();
+
+        resource.remove({
+          id: '2',
+          name: 'Test Entity 2',
+        });
+
+        await tick(20); // wait for delete to finish
+        await tick(); // refresh doesn't happen but still wait to catch potential errors
+
+        expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          '[@angular-experts/resource]',
+          `Incremental remove request returned no item or item ID, this is unexpected, if your API does not return the removed item or removed item ID, consider using "optimistic" strategy instead, Skip...`,
+        );
       });
 
       it('sets remove loading and loading state while removing', async () => {
@@ -883,7 +1080,6 @@ describe('Rest Resource', () => {
   });
 
   describe('Other options', () => {
-
     beforeEach(() => {
       mockGet.mockReturnValue(of(TEST_ENTITIES_WITH_ID_IN_ID_PROPERTY));
     });
@@ -919,9 +1115,12 @@ describe('Rest Resource', () => {
         typeof restResource<EntityWithIdInOtherIdProperty, string>
       >;
       runInInjectionContext(injector, () => {
-        resource = restResource<EntityWithIdInOtherIdProperty, string>('some/api', {
-          idSelector: (item) => item.otherId,
-        });
+        resource = restResource<EntityWithIdInOtherIdProperty, string>(
+          'some/api',
+          {
+            idSelector: (item) => item.otherId,
+          },
+        );
       });
 
       await tick();

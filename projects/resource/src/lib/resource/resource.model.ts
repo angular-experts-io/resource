@@ -1,6 +1,14 @@
 export type RequestType = 'create' | 'update' | 'remove';
 export type Behavior = 'concat' | 'merge' | 'switch' | 'exhaust';
-export type Strategy = 'optimistic' | 'pessimistic';
+
+/**
+ *  Strategy for handling resource requests
+ *
+ * - `'pessimistic'` - wait for server response, then reload the entire collection
+ * - `'optimistic'` - update UI immediately and assume success
+ * - `'incremental'` - patch returned item into the existing collection after server confirms
+ */
+export type Strategy = 'optimistic' | 'pessimistic' | 'incremental';
 
 export interface RestResourceOptions<T, ID> {
   /**
@@ -31,7 +39,11 @@ export interface RestResourceOptions<T, ID> {
 
   /**
    * The default strategy for the resource for every request type,
-   * it can be overridden by the request type specific strategy
+   * it can be overridden by the request-type specific strategy
+   *
+   * - `'pessimistic'` - wait for server response, then reload the entire collection
+   * - `'optimistic'` - update UI immediately and assume success
+   * - `'incremental'` - patch returned item into the existing collection after server confirms
    *
    * @default 'pessimistic'
    */

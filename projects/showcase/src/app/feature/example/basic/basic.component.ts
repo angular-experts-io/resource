@@ -54,7 +54,11 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicComponent {
-  todos = restResource<Todo, string>('todos');
+  todos = restResource<Todo, string>('todos', {
+    create: {
+      strategy: 'incremental'
+    }
+  });
 
   newTodo = signal('');
 
