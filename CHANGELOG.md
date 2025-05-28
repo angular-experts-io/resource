@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6](https://github.com/angular-experts-io/resource/compare/v0.0.5...v0.0.6) (2025-05-28)
+
+
+### Features
+
+* **resource:** implement incremental strategy for create, update, and remove operations ([02ac4be](https://github.com/angular-experts-io/resource/commit/02ac4bed82cc4c14c86ce556480d492176f67c02))
+* **resource:** refactor and extract resource model and util functions ([8d0dcdc](https://github.com/angular-experts-io/resource/commit/8d0dcdc83092ea58a5d3b0eeabe917c8f8220947))
+* **showcase:** update api doc ([db6c987](https://github.com/angular-experts-io/resource/commit/db6c9871341d0b67d2fdc0b5f229decd994dbb65))
+
+
+### Bug Fixes
+
+* **showcase:** npm link ([9f42eb4](https://github.com/angular-experts-io/resource/commit/9f42eb4004cac0e7fd4f3a615bc1b4fa0f30d415))
+* **showcase:** redirect to api when navigating to docs ([76d5769](https://github.com/angular-experts-io/resource/commit/76d576922cf01ce2ff414893a43555a1b01d6509))
+
 ### [0.0.5](https://github.com/angular-experts-io/resource/compare/v0.0.4...v0.0.5) (2025-05-22)
 
 ### [0.0.4](https://github.com/angular-experts-io/resource/compare/v0.0.3...v0.0.4) (2025-05-20)
