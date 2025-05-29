@@ -24,20 +24,76 @@ import { MatListModule } from '@angular/material/list';
 
               <div class="flex flex-col gap-8">
                 @for (property of interface.properties; track property.name) {
-                  <div
-                    class="flex flex-col items-baseline gap-2 md:flex-row md:gap-6 "
-                  >
-                    <div class="flex min-w-72 flex-col items-start gap-2">
-                      <code>{{ property.name }}: {{ property.type }}</code>
+                  <div class="p-4  odd:bg-gray-50 dark:odd:bg-gray-900">
+                    <div
+                      class="grid grid-cols-1 gap-2 rounded-lg  md:grid-cols-4 md:gap-6"
+                    >
+                      <div class="flex flex-col items-start gap-2">
+                        <code>{{ property.name }}: {{ property.type }}</code>
+                      </div>
+                      <div class="flex-col gap-4 md:col-span-3">
+                        <p class="text-sm">
+                          {{ property.description }}
+                          @if (property.defaultValue) {
+                            <div class="pt-4">
+                              Default value
+                              <code>{{ property.defaultValue }}</code>
+                            </div>
+                          }
+                        </p>
+                      </div>
                     </div>
-                    <p class="text-sm">
-                      {{ property.description }}
-                      @if (property.defaultValue) {
-                        <div class="pt-4">
-                          Default value <code>{{ property.defaultValue }}</code>
-                        </div>
-                      }
-                    </p>
+                    @if (property.properties?.length) {
+                      <div class="mt-10 ml-8 flex flex-col gap-10">
+                        @for (
+                          subprop of property.properties;
+                          track subprop.name
+                        ) {
+                          <div
+                            class="grid grid-cols-1 gap-2 md:grid-cols-4 md:gap-6"
+                          >
+                            <div class="flex flex-col items-start gap-2">
+                              <code class="whitespace-nowrap"
+                                >{{ subprop.name }}: {{ subprop.type }}</code
+                              >
+                            </div>
+                            <div class="md:col-span-3 md:-ml-6">
+                              <p class="text-sm">
+                                {{ subprop.description }}
+                                @if (subprop.defaultValue) {
+                                  <div class="pt-4">
+                                    Default value
+                                    <code>{{ subprop.defaultValue }}</code>
+                                  </div>
+                                }
+                                @if (subprop.properties?.length) {
+                                  <div class="mt-8">
+                                    <div class="flex flex-col gap-4">
+                                      @for (
+                                        subsubprop of subprop.properties;
+                                        track subsubprop.name
+                                      ) {
+                                        <div class="flex flex-row gap-4">
+                                          <div>
+                                            <code class="whitespace-nowrap"
+                                              >{{ subsubprop.name }}:
+                                              {{ subsubprop.type }}</code
+                                            >
+                                          </div>
+                                          <span class=" flex-1">{{
+                                            subsubprop.description
+                                          }}</span>
+                                        </div>
+                                      }
+                                    </div>
+                                  </div>
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
                 }
               </div>
