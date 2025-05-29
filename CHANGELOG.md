@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.7](https://github.com/angular-experts-io/resource/compare/v0.0.6...v0.0.7) (2025-05-29)
+
+
+### Features
+
+* **lib:** supported angular range ([cb5f26d](https://github.com/angular-experts-io/resource/commit/cb5f26dff14be5dea6e445447692e77b03ad0030))
+* **showcase:** add more API doc layout ([9dafce2](https://github.com/angular-experts-io/resource/commit/9dafce24440917404d9224282e33ba930db0b4ce))
+* **showcase:** add more API doc layout ([6990b4c](https://github.com/angular-experts-io/resource/commit/6990b4cac11cc687a36109f12148143d769a3775))
+* **showcase:** add more API doc layout ([91ce1b2](https://github.com/angular-experts-io/resource/commit/91ce1b2dbfa25f694cefcb205c1997ed16670818))
+* **showcase:** API doc standard layout ([5b36b01](https://github.com/angular-experts-io/resource/commit/5b36b01f99e17075365eb4d23f5a60e0cbdfb64c))
+* **showcase:** update API doc data ([d56e399](https://github.com/angular-experts-io/resource/commit/d56e399846b888a7cfb30cb1286169733247478f))
+* **showcase:** update API doc data, extract reusable card ([3adca66](https://github.com/angular-experts-io/resource/commit/3adca667abcb7e117ed15c8dbcaf6c8f3f6ce53c))
+
 ### [0.0.6](https://github.com/angular-experts-io/resource/compare/v0.0.5...v0.0.6) (2025-05-28)
 
 
