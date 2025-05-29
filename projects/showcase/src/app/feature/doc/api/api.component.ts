@@ -46,284 +46,10 @@ interface ApiType {
   selector: 'showcase-api',
   standalone: true,
   imports: [MatCardModule, MatDividerModule, MatExpansionModule, MatListModule],
-  template: `
-    <div class="api-container">
-      <h1>&#64;angular-experts/resource API</h1>
-
-      <section>
-        <h2>Functions</h2>
-        @for (method of methods(); track method.name) {
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>{{ method.name }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p class="description">{{ method.description }}</p>
-              <pre><code>{{ method.signature }}</code></pre>
-
-              @if (method.parameters.length > 0) {
-                <h3>Parameters</h3>
-                <div class="params-grid">
-                  <div class="param-header">Name</div>
-                  <div class="param-header">Type</div>
-                  <div class="param-header">Description</div>
-
-                  @for (param of method.parameters; track param.name) {
-                    <div class="param-name">
-                      {{ param.name }}{{ param.optional ? '?' : '' }}
-                    </div>
-                    <div class="param-type">{{ param.type }}</div>
-                    <div
-                      class="param-description"
-                      [innerHTML]="param.description"
-                    ></div>
-                  }
-                </div>
-              }
-
-              <h3>Returns</h3>
-              <div class="returns-grid">
-                <div class="param-header">Type</div>
-                <div class="param-header">Description</div>
-
-                <div class="param-type">{{ method.returns.type }}</div>
-                <div
-                  class="param-description"
-                  [innerHTML]="method.returns.description"
-                ></div>
-              </div>
-
-              @if (
-                method.returns.properties &&
-                method.returns.properties.length > 0
-              ) {
-                <h4>Return Object Properties</h4>
-                <div class="properties-grid">
-                  <div class="param-header">Name</div>
-                  <div class="param-header">Type</div>
-                  <div class="param-header">Description</div>
-
-                  @for (prop of method.returns.properties; track prop.name) {
-                    <div class="param-name">{{ prop.name }}</div>
-                    <div class="param-type">{{ prop.type }}</div>
-                    <div
-                      class="param-description"
-                      [innerHTML]="prop.description"
-                    ></div>
-                  }
-                </div>
-              }
-            </mat-card-content>
-          </mat-card>
-        }
-      </section>
-
-      <mat-divider></mat-divider>
-
-      <section>
-        <h2>Interfaces</h2>
-        @for (interface of interfaces(); track interface.name) {
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                {{ interface.name }}
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-
-            <p class="description">{{ interface.description }}</p>
-
-            <h3>Properties</h3>
-            <div class="properties-grid">
-              <div class="param-header">Name</div>
-              <div class="param-header">Type</div>
-              <div class="param-header">Description</div>
-
-              @for (prop of interface.properties; track prop.name) {
-                <div class="param-name">
-                  {{ prop.name }}{{ prop.optional ? '?' : '' }}
-                </div>
-                <div class="param-type">{{ prop.type }}</div>
-                <div
-                  class="param-description"
-                  [innerHTML]="prop.description"
-                ></div>
-              }
-            </div>
-          </mat-expansion-panel>
-        }
-      </section>
-
-      <mat-divider></mat-divider>
-
-      <section>
-        <h2>Types</h2>
-        @for (type of types(); track type.name) {
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>{{ type.name }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p class="description">{{ type.description }}</p>
-              @if (type.values) {
-                <div>
-                  <h3>Values</h3>
-                  <div class="values-grid">
-                    @for (value of type.values; track value) {
-                      <div class="value-item">{{ value }}</div>
-                    }
-                  </div>
-                </div>
-              }
-            </mat-card-content>
-          </mat-card>
-        }
-      </section>
-    </div>
-  `,
+  template: ``,
   styles: `
     :host {
       display: block;
-      padding: 1rem;
-    }
-
-    .api-container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    section {
-      margin-bottom: 2rem;
-    }
-
-    h1,
-    h2 {
-      margin-bottom: 1rem;
-    }
-
-    h3 {
-      margin-top: 1.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    h4 {
-      margin-top: 1.25rem;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-
-    mat-card,
-    mat-expansion-panel {
-      margin-bottom: 1rem;
-    }
-
-    pre {
-      padding: 1rem;
-      border-radius: 4px;
-      overflow-x: auto;
-      border: 1px solid transparent;
-    }
-
-    mat-divider {
-      margin: 2rem 0;
-    }
-
-    .description {
-      max-width: 100%;
-      line-height: 1.5;
-      margin-bottom: 1rem;
-    }
-
-    .description-list {
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
-      padding-left: 1.5rem;
-    }
-
-    .description-list li {
-      margin-bottom: 0.5rem;
-      line-height: 1.5;
-    }
-
-    /* Grid layouts for tabular data */
-    .params-grid,
-    .returns-grid,
-    .properties-grid {
-      display: grid;
-      margin-bottom: 1.5rem;
-      border-radius: 4px;
-      overflow: hidden;
-      border: 1px solid transparent;
-    }
-
-    .params-grid {
-      grid-template-columns: minmax(120px, auto) minmax(120px, auto) 1fr;
-    }
-
-    .returns-grid {
-      grid-template-columns: minmax(120px, auto) 1fr;
-    }
-
-    .properties-grid {
-      grid-template-columns: minmax(120px, auto) minmax(120px, auto) 1fr;
-      /* Add more whitespace between individual properties */
-      margin-top: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    /* Add more whitespace between individual properties in interfaces */
-    .properties-grid > .param-description:nth-child(3n) {
-      margin-bottom: 1.5rem;
-    }
-
-    .values-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      margin-bottom: 1.5rem;
-      border-radius: 4px;
-      overflow: hidden;
-      border: 1px solid transparent;
-    }
-
-    .param-header {
-      font-weight: bold;
-      padding: 0.5rem;
-      border: 1px solid transparent;
-    }
-
-    .param-name {
-      font-weight: bold;
-      padding: 0.5rem;
-      border: 1px solid transparent;
-    }
-
-    .param-type {
-      color: #673ab7;
-      padding: 0.5rem;
-      border: 1px solid transparent;
-    }
-
-    .param-description {
-      line-height: 1.5;
-      padding: 0.5rem;
-      border: 1px solid transparent;
-    }
-
-    .value-item {
-      padding: 0.5rem;
-      border: 1px solid transparent;
-    }
-
-    /* Format multi-line descriptions with proper line breaks */
-    .param-description ul,
-    .description ul {
-      margin-top: 0.5rem;
-      margin-bottom: 0.5rem;
-      padding-left: 1.5rem;
-    }
-
-    .param-description li,
-    .description li {
-      margin-bottom: 0.5rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -412,25 +138,25 @@ export class ApiComponent {
             name: 'values',
             type: 'Signal<T[]>',
             description:
-              'Signal containing the array of items returned from the API. Implemented using linkedSignal to maintain previous values when source is undefined during reload because the params have changed (to prevent jumpy UI)',
+              'The values of the resource (list of 0 to n items). Implemented using linkedSignal to maintain previous values when source is undefined during reload because the params have changed (to prevent jumpy UI).',
           },
           {
             name: 'value',
             type: 'Signal<T | undefined>',
             description:
-              'Signal containing the first item from the values array, if there is only one item.',
+              'The value of the resource, ONLY if the resource is a single item. This is useful when building a resource to manage a single entity, eg detail view. Returns undefined if resource has more than one item.',
           },
           {
             name: 'hasValue',
             type: 'Signal<boolean>',
             description:
-              'Signal indicating whether the resource has a single value.',
+              'Signal indicating whether the resource has a single value (value is not null and not undefined).',
           },
           {
             name: 'hasValues',
             type: 'Signal<boolean>',
             description:
-              'Signal indicating whether the resource has any values.',
+              'Signal indicating whether the resource has any values (length > 0).',
           },
           {
             name: 'create',
@@ -479,7 +205,7 @@ export class ApiComponent {
           name: 'params',
           type: '() => string | undefined',
           description:
-            'A reactive function which determines the request to be made. Whenever the params change, the loader will be triggered to fetch a new value for the resource.',
+            "A reactive function which determines the request to be made. Whenever the params change, the loader will be triggered to fetch a new value for the resource. (works the same way as Angular's `resource`)",
           optional: true,
         },
         {
@@ -493,16 +219,18 @@ export class ApiComponent {
           name: 'strategy',
           type: 'Strategy',
           description:
-            'The default strategy for the resource for every request type, it can be overridden by the request type specific strategy. Default is "pessimistic".',
+            'The default strategy for the resource for every request type, it can be overridden by the request-type specific strategy. Options are: "optimistic" (update UI immediately and assume success), "pessimistic" (wait for server response, then reload the entire collection), or "incremental" (patch returned item into the existing collection after server confirms). Default is "pessimistic".',
           optional: true,
         },
         {
           name: 'create',
           type: 'Object',
           description: `Configuration options specific to create operations. Properties include:<ul>
-<li><strong>behavior</strong>: Defines how create requests are handled when multiple requests are made (default: 'concat')</li>
-<li><strong>strategy</strong>: Determines whether changes are applied optimistically or pessimistically (default: global strategy)</li>
-<li><strong>id</strong>: Object for ID generation with generator and optional setter functions</li>
+<li><strong>behavior</strong>: Defines how create requests are handled when multiple requests are made. Controls the RxJS flattening operator used for the HTTP request. (default: 'concat')</li>
+<li><strong>strategy</strong>: Determines whether changes are applied optimistically (before server confirmation), pessimistically (after server confirmation), or incrementally (patch returned item into the existing collection) for create operations. (default: global strategy)</li>
+<li><strong>id</strong>: Object for ID generation with generator and optional setter functions. Useful when the backend does not assign IDs automatically.</li>
+<li><strong>id.generator</strong>: A function that returns a new ID (e.g., UUID or auto-increment).</li>
+<li><strong>id.setter</strong>: (Optional) A function that sets the generated ID onto the item, especially useful when the item's ID field is not named 'id'.</li>
 </ul>`,
           optional: true,
         },
@@ -510,8 +238,8 @@ export class ApiComponent {
           name: 'update',
           type: 'Object',
           description: `Configuration options specific to update operations. Properties include:<ul>
-<li><strong>behavior</strong>: Defines how update requests are handled when multiple requests are made (default: 'concat')</li>
-<li><strong>strategy</strong>: Determines whether changes are applied optimistically or pessimistically (default: global strategy)</li>
+<li><strong>behavior</strong>: Defines how update requests are handled when multiple requests are made. Controls the RxJS flattening operator used for the HTTP request. (default: 'concat')</li>
+<li><strong>strategy</strong>: Determines whether changes are applied optimistically (before server confirmation), pessimistically (after server confirmation), or incrementally (patch returned item into the existing collection) for update operations. (default: global strategy)</li>
 </ul>`,
           optional: true,
         },
@@ -519,8 +247,8 @@ export class ApiComponent {
           name: 'remove',
           type: 'Object',
           description: `Configuration options specific to remove operations. Properties include:<ul>
-<li><strong>behavior</strong>: Defines how remove requests are handled when multiple requests are made (default: 'concat')</li>
-<li><strong>strategy</strong>: Determines whether changes are applied optimistically or pessimistically (default: global strategy)</li>
+<li><strong>behavior</strong>: Defines how remove requests are handled when multiple requests are made. Controls the RxJS flattening operator used for the HTTP request. (default: 'concat')</li>
+<li><strong>strategy</strong>: Determines whether changes are applied optimistically (before server confirmation), pessimistically (after server confirmation), or incrementally (patch returned item into the existing collection) for remove operations. (default: global strategy)</li>
 </ul>`,
           optional: true,
         },
@@ -571,8 +299,8 @@ export class ApiComponent {
     {
       name: 'Strategy',
       description:
-        'Determines whether changes are applied optimistically (before server confirmation) or pessimistically (after server confirmation).',
-      values: ['optimistic', 'pessimistic'],
+        'Strategy for handling resource requests: optimistic (update UI immediately and assume success), pessimistic (wait for server response, then reload the entire collection), or incremental (patch returned item into the existing collection after server confirms).',
+      values: ['optimistic', 'pessimistic', 'incremental'],
     },
   ]);
 }

@@ -22,6 +22,12 @@
   --color-primary-100: #FFFFFF;
 }
 
+@layer components {
+  .card {
+    @apply flex  gap-4 rounded-xl bg-white px-6 py-4 shadow-sm  transition-shadow duration-200 hover:shadow-md dark:bg-slate-800
+  }
+}
+
 html,
 body {
   height: 100%;

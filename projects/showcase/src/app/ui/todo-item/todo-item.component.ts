@@ -1,9 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   input,
-  Output,
   output,
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
@@ -17,7 +15,7 @@ import { Todo } from '../../model/todo.model';
   template: `
     <div
       [class.pointer-events-none]="disabled()"
-      class="flex cursor-pointer items-center justify-between gap-4 rounded-xl bg-white px-6 py-4 shadow-sm  transition-shadow duration-200 hover:shadow-md dark:bg-slate-800"
+      class="card items-center justify-between cursor-pointer"
       (click)="toggle.emit(t)"
     >
       @let t = todo();
