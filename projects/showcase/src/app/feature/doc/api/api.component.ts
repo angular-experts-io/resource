@@ -13,6 +13,139 @@ import { MatListModule } from '@angular/material/list';
 
     <div class=" mt-8 flex flex-col gap-8">
       <div>
+        <h3>Main Function</h3>
+        @let mainFunction = apiDoc().mainFunction;
+
+        <div class="mt-4 flex flex-col gap-4">
+          <div class="card flex-col">
+            <h4>{{ mainFunction.name }}</h4>
+            <p>{{ mainFunction.description }}</p>
+
+            <div class="mt-4">
+              <h5>Parameters</h5>
+              <div class="flex flex-col gap-4">
+                @for (param of mainFunction.parameters; track param.name) {
+                  <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
+                    <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6">
+                      <div class="flex flex-col items-start gap-2">
+                        <code>{{ param.name }}: {{ param.type }}</code>
+                        @if (param.isOptional) {
+                          <span class="text-xs text-gray-500">Optional</span>
+                        }
+                      </div>
+                      <div class="flex-col gap-4 md:col-span-3">
+                        <p class="text-sm">
+                          {{ param.description }}
+                          @if (param.defaultValue) {
+                            <div class="pt-4">
+                              Default value
+                              <code>{{ param.defaultValue }}</code>
+                            </div>
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <h5>Returns</h5>
+              <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
+                <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6">
+                  <div class="flex flex-col items-start gap-2">
+                    <code>{{ mainFunction.returnType }}</code>
+                  </div>
+                  <div class="flex-col gap-4 md:col-span-3">
+                    <p class="text-sm">{{ mainFunction.returnDescription }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>Returned Properties</h3>
+        @let returnedProperties = apiDoc().returnedProperties;
+
+        <div class="mt-4 flex flex-col gap-4">
+          <div class="card flex-col">
+            <div class="flex flex-col gap-8">
+              @for (property of returnedProperties; track property.name) {
+                <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
+                  <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-2 md:gap-6 md:items-center">
+                    <div class="flex flex-col items-start gap-2">
+                      <code>{{ property.name }}: {{ property.type }}</code>
+                    </div>
+                    <div class="flex-col gap-4">
+                      <p class="text-sm">
+                        {{ property.description }}
+                        @if (property.defaultValue) {
+                          <div class="pt-4">
+                            Default value
+                            <code>{{ property.defaultValue }}</code>
+                          </div>
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>Returned Methods</h3>
+        @let returnedMethods = apiDoc().returnedMethods;
+
+        <div class="mt-4 flex flex-col gap-4">
+          <div class="card flex-col">
+            <div class="flex flex-col gap-8">
+              @for (method of returnedMethods; track method.name) {
+                <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
+                  <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6">
+                    <div class="flex flex-col items-start gap-2">
+                      <code>{{ method.name }}()</code>
+                    </div>
+                    <div class="flex-col gap-4 md:col-span-3">
+                      <p class="text-sm">{{ method.description }}</p>
+
+                      @if (method.parameters.length > 0) {
+                        <div class="mt-4">
+                          <h6>Parameters</h6>
+                          <div class="flex flex-col gap-2">
+                            @for (param of method.parameters; track param.name) {
+                              <div class="flex flex-row gap-4 items-center">
+                                <code class="whitespace-nowrap">{{ param.name }}: {{ param.type }}</code>
+                                <span class="text-sm flex-1">{{ param.description }}</span>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+
+                      <div class="mt-4">
+                        <h6>Returns</h6>
+                        <div class="flex flex-row gap-4 items-center">
+                          <code class="whitespace-nowrap">{{ method.returnType }}</code>
+                          <span class="text-sm flex-1">{{ method.returnDescription }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
         <h3>Options</h3>
         @let interfaces = apiDoc().interfaces;
 
@@ -24,7 +157,7 @@ import { MatListModule } from '@angular/material/list';
 
               <div class="flex flex-col gap-8">
                 @for (property of interface.properties; track property.name) {
-                  <div class="p-4  odd:bg-gray-50 dark:odd:bg-gray-900">
+                  <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
                     <div
                       class="grid grid-cols-1 gap-2 rounded-lg  md:grid-cols-4 md:gap-6"
                     >
@@ -119,6 +252,38 @@ import { MatListModule } from '@angular/material/list';
               }
             </div>
           }
+        </div>
+      </div>
+
+      <div>
+        <h3>Generics</h3>
+        @let generics = apiDoc().generics;
+
+        <div class="mt-4 flex flex-col gap-4">
+          <div class="card flex-col">
+            <div class="flex flex-col gap-8">
+              @for (generic of generics; track generic.name) {
+                <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
+                  <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6">
+                    <div class="flex flex-col items-start gap-2">
+                      <code>{{ generic.name }}: {{ generic.type }}</code>
+                    </div>
+                    <div class="flex-col gap-4 md:col-span-3">
+                      <p class="text-sm">
+                        {{ generic.description }}
+                        @if (generic.defaultValue) {
+                          <div class="pt-4">
+                            Default value
+                            <code>{{ generic.defaultValue }}</code>
+                          </div>
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -354,6 +519,23 @@ export class ApiComponent {
         ],
       },
     ],
+    generics: [
+      {
+        name: 'T',
+        type: 'Type',
+        description: 'The type of the resource items being managed. This is a generic type parameter that should be specified when using the resource.',
+      },
+      {
+        name: 'ID',
+        type: 'Type',
+        description: 'The type of the ID field for the resource items. This is typically a string or number.',
+      },
+      {
+        name: 'E',
+        type: 'Type',
+        description: 'The type of error that can be returned by the API. This is a generic type parameter that can be specified when using the resource.',
+      },
+    ],
     interfaces: [
       {
         name: 'RestResourceOptions<T, ID>',
@@ -525,4 +707,5 @@ interface ApiDocumentation {
   interfaces: ApiInterface[];
   returnedProperties: ApiProperty[];
   returnedMethods: ApiMethod[];
+  generics?: ApiProperty[];
 }
