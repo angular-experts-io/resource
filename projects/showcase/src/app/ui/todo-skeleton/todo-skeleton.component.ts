@@ -10,11 +10,11 @@ import { MatCardModule } from '@angular/material/card';
   selector: 'showcase-todo-skeleton',
   imports: [CommonModule, MatCardModule],
   template: `
-    <div *ngFor="let _ of [].constructor(repeat())">
+    @for (_ of [].constructor(repeat()); track $index) {
       <mat-card class="mb-4 p-4">
         <div class="animate-pulse flex items-center justify-between w-full">
           <!-- Left part: Placeholder for checkbox/icon and description -->
-          <div class="flex items-center gap-3 w-full"> <!-- Increased gap slightly for skeleton if needed, original is gap-6 -->
+          <div class="flex items-center gap-3 w-full">
             <!-- Checkbox placeholder -->
             <div class="h-6 w-6 bg-gray-300 rounded"></div>
             <!-- Description placeholder -->
@@ -27,7 +27,7 @@ import { MatCardModule } from '@angular/material/card';
           </div>
         </div>
       </mat-card>
-    </div>
+    }
   `,
   styles: `
     :host {
