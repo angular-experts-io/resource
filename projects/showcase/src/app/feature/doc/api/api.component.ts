@@ -8,7 +8,30 @@ import { MatListModule } from '@angular/material/list';
   selector: 'showcase-api',
   standalone: true,
   imports: [MatCardModule, MatDividerModule, MatExpansionModule, MatListModule],
-  template: ``,
+  template: `
+    <h2>API Documentation</h2>
+
+    <div class=" mt-8 flex flex-col gap-8">
+      <h3>Types</h3>
+      @let types = apiDoc().types;
+
+      <div class="flex flex-col gap-4">
+        @for (type of types; track type.name) {
+          <div class="card flex-col">
+            <h4>{{ type.name }}</h4>
+            <p>{{ type.description }}</p>
+
+            @for (value of type.values; track value.name) {
+              <div class="flex items-center gap-2">
+                <code>{{ value.name }}</code>
+                <p class="text-sm">{{ value.description }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  `,
   styles: `
     :host {
       display: block;
@@ -46,18 +69,61 @@ export class ApiComponent {
       {
         name: 'RequestType',
         description: 'Type of request that can be made to the resource.',
-        values: ['create', 'update', 'remove'],
+        values: [
+          {
+            name: 'create',
+            description: 'Creates a new resource item on the server',
+          },
+          {
+            name: 'update',
+            description: 'Updates an existing resource item on the server',
+          },
+          {
+            name: 'remove',
+            description: 'Removes a resource item from the server',
+          },
+        ],
       },
       {
         name: 'Behavior',
         description:
           'Defines how requests are handled when multiple requests are made. Controls the RxJS flattening operator used for the HTTP request.',
-        values: ['concat', 'merge', 'switch', 'exhaust'],
+        values: [
+          {
+            name: 'concat',
+            description: 'Queues requests and processes them sequentially',
+          },
+          {
+            name: 'merge',
+            description: 'Processes requests in parallel as they arrive',
+          },
+          {
+            name: 'switch',
+            description: 'Cancels previous requests when a new one arrives',
+          },
+          {
+            name: 'exhaust',
+            description: 'Ignores new requests until the current one completes',
+          },
+        ],
       },
       {
         name: 'Strategy',
         description: 'Strategy for handling resource requests.',
-        values: ['optimistic', 'pessimistic', 'incremental'],
+        values: [
+          {
+            name: 'optimistic',
+            description: 'Update UI immediately and assume success',
+          },
+          {
+            name: 'pessimistic',
+            description: 'Wait for server response, then reload the entire collection',
+          },
+          {
+            name: 'incremental',
+            description: 'Patch returned item into the existing collection after server confirms',
+          },
+        ],
       },
     ],
     interfaces: [
@@ -343,7 +409,7 @@ interface ApiProperty {
 interface ApiType {
   name: string;
   description: string;
-  values?: string[];
+  values?: { name: string; description: string }[];
 }
 
 interface ApiInterface {

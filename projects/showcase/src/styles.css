@@ -26,6 +26,10 @@
   .card {
     @apply flex  gap-4 rounded-xl bg-white px-6 py-4 shadow-sm  transition-shadow duration-200 hover:shadow-md dark:bg-slate-800
   }
+
+  code {
+    @apply bg-slate-100 dark:bg-slate-700 rounded-lg px-4 py-1 overflow-x-auto text-sm;
+  }
 }
 
 html,
