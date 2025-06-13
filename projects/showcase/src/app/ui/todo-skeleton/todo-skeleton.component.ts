@@ -1,29 +1,27 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'showcase-todo-skeleton',
-  imports: [CommonModule, MatCardModule],
+  imports: [MatCardModule],
   template: `
     @for (_ of [].constructor(repeat()); track $index) {
       <mat-card class="mb-4 p-4">
-        <div class="animate-pulse flex items-center justify-between w-full">
+        <div class="flex w-full animate-pulse items-center justify-between">
           <!-- Left part: Placeholder for checkbox/icon and description -->
-          <div class="flex items-center gap-3 w-full">
+          <div class="flex w-full items-center gap-3">
             <!-- Checkbox placeholder -->
-            <div class="h-6 w-6 bg-gray-300 rounded"></div>
+            <div class="h-6 w-6 rounded bg-gray-300"></div>
             <!-- Description placeholder -->
-            <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+            <div class="h-4 w-3/4 rounded bg-gray-300"></div>
           </div>
           <!-- Right part: Placeholders for two icon buttons -->
           <div class="flex items-center gap-2">
-            <div class="h-8 w-8 bg-gray-300 rounded-full"></div> <!-- Placeholder for edit icon button -->
-            <div class="h-8 w-8 bg-gray-300 rounded-full"></div> <!-- Placeholder for delete icon button -->
+            <div class="h-8 w-8 rounded-full bg-gray-300"></div>
+            <!-- Placeholder for edit icon button -->
+            <div class="h-8 w-8 rounded-full bg-gray-300"></div>
+            <!-- Placeholder for delete icon button -->
           </div>
         </div>
       </mat-card>

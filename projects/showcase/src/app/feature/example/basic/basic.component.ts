@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core'; // Removed inject
-import { CommonModule } from '@angular/common';
+
 import { MatFormField, MatInput } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -11,7 +11,6 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
 @Component({
   selector: 'showcase-basic',
   imports: [
-    CommonModule,
     MatInput,
     MatFormField,
     TodoItemComponent,
@@ -39,8 +38,13 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
         <div class="relative flex flex-col gap-4">
           <!-- Spinner for non-initial loads -->
           @if (todos.loading() && !todos.loadingInitial()) {
-            <div class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-10">
-              <mat-progress-spinner diameter="24" mode="indeterminate"></mat-progress-spinner>
+            <div
+              class="bg-opacity-50 absolute inset-0 z-10 flex items-center justify-center bg-white"
+            >
+              <mat-progress-spinner
+                diameter="24"
+                mode="indeterminate"
+              ></mat-progress-spinner>
             </div>
           }
 
@@ -72,10 +76,11 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicComponent {
-  todos = restResource<Todo, string>('todos', { // Added back local restResource
+  todos = restResource<Todo, string>('todos', {
+    // Added back local restResource
     create: {
-      strategy: 'incremental'
-    }
+      strategy: 'incremental',
+    },
   });
   newTodo = signal('');
 

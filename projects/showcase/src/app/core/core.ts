@@ -11,7 +11,7 @@ import {
 import {
   inject,
   provideEnvironmentInitializer,
-  provideExperimentalZonelessChangeDetection,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
@@ -26,7 +26,7 @@ export interface CoreOptions {
 export function provideCore(options: CoreOptions) {
   return [
     provideAnimationsAsync(),
-    provideExperimentalZonelessChangeDetection(),
+    provideZonelessChangeDetection(),
     provideHttpClient(withFetch(), withInterceptors([apiInterceptor])),
     provideRouter(options.routes, withComponentInputBinding()),
     provideEnvironmentInitializer(() => {

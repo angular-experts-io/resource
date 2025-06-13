@@ -25,8 +25,12 @@ import { MatListModule } from '@angular/material/list';
               <h5>Parameters</h5>
               <div class="flex flex-col gap-4">
                 @for (param of mainFunction.parameters; track param.name) {
-                  <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
-                    <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6">
+                  <div
+                    class="rounded-lg p-4 odd:bg-gray-50 dark:odd:bg-gray-900"
+                  >
+                    <div
+                      class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6"
+                    >
                       <div class="flex flex-col items-start gap-2">
                         <code>{{ param.name }}: {{ param.type }}</code>
                         @if (param.isOptional) {
@@ -52,8 +56,10 @@ import { MatListModule } from '@angular/material/list';
 
             <div class="mt-4">
               <h5>Returns</h5>
-              <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
-                <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6">
+              <div class="rounded-lg p-4 odd:bg-gray-50 dark:odd:bg-gray-900">
+                <div
+                  class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6"
+                >
                   <div class="flex flex-col items-start gap-2">
                     <code>{{ mainFunction.returnType }}</code>
                   </div>
@@ -75,8 +81,10 @@ import { MatListModule } from '@angular/material/list';
           <div class="card flex-col">
             <div class="flex flex-col gap-8">
               @for (property of returnedProperties; track property.name) {
-                <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
-                  <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-2 md:gap-6 md:items-center">
+                <div class="rounded-lg p-4 odd:bg-gray-50 dark:odd:bg-gray-900">
+                  <div
+                    class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-2 md:items-center md:gap-6"
+                  >
                     <div class="flex flex-col items-start gap-2">
                       <code>{{ property.name }}: {{ property.type }}</code>
                     </div>
@@ -107,8 +115,10 @@ import { MatListModule } from '@angular/material/list';
           <div class="card flex-col">
             <div class="flex flex-col gap-8">
               @for (method of returnedMethods; track method.name) {
-                <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
-                  <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6">
+                <div class="rounded-lg p-4 odd:bg-gray-50 dark:odd:bg-gray-900">
+                  <div
+                    class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6"
+                  >
                     <div class="flex flex-col items-start gap-2">
                       <code>{{ method.name }}()</code>
                     </div>
@@ -119,10 +129,17 @@ import { MatListModule } from '@angular/material/list';
                         <div class="mt-4">
                           <h6>Parameters</h6>
                           <div class="flex flex-col gap-2">
-                            @for (param of method.parameters; track param.name) {
-                              <div class="flex flex-row gap-4 items-center">
-                                <code class="whitespace-nowrap">{{ param.name }}: {{ param.type }}</code>
-                                <span class="text-sm flex-1">{{ param.description }}</span>
+                            @for (
+                              param of method.parameters;
+                              track param.name
+                            ) {
+                              <div class="flex flex-row items-center gap-4">
+                                <code class="whitespace-nowrap"
+                                  >{{ param.name }}: {{ param.type }}</code
+                                >
+                                <span class="flex-1 text-sm">{{
+                                  param.description
+                                }}</span>
                               </div>
                             }
                           </div>
@@ -131,9 +148,13 @@ import { MatListModule } from '@angular/material/list';
 
                       <div class="mt-4">
                         <h6>Returns</h6>
-                        <div class="flex flex-row gap-4 items-center">
-                          <code class="whitespace-nowrap">{{ method.returnType }}</code>
-                          <span class="text-sm flex-1">{{ method.returnDescription }}</span>
+                        <div class="flex flex-row items-center gap-4">
+                          <code class="whitespace-nowrap">{{
+                            method.returnType
+                          }}</code>
+                          <span class="flex-1 text-sm">{{
+                            method.returnDescription
+                          }}</span>
                         </div>
                       </div>
                     </div>
@@ -157,7 +178,9 @@ import { MatListModule } from '@angular/material/list';
 
               <div class="flex flex-col gap-8">
                 @for (property of interface.properties; track property.name) {
-                  <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
+                  <div
+                    class="rounded-lg p-4 odd:bg-gray-50 dark:odd:bg-gray-900"
+                  >
                     <div
                       class="grid grid-cols-1 gap-2 rounded-lg  md:grid-cols-4 md:gap-6"
                     >
@@ -263,8 +286,10 @@ import { MatListModule } from '@angular/material/list';
           <div class="card flex-col">
             <div class="flex flex-col gap-8">
               @for (generic of generics; track generic.name) {
-                <div class="p-4 rounded-lg odd:bg-gray-50 dark:odd:bg-gray-900">
-                  <div class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6">
+                <div class="rounded-lg p-4 odd:bg-gray-50 dark:odd:bg-gray-900">
+                  <div
+                    class="grid grid-cols-1 gap-2 rounded-lg md:grid-cols-4 md:gap-6"
+                  >
                     <div class="flex flex-col items-start gap-2">
                       <code>{{ generic.name }}: {{ generic.type }}</code>
                     </div>
@@ -523,17 +548,20 @@ export class ApiComponent {
       {
         name: 'T',
         type: 'Type',
-        description: 'The type of the resource items being managed. This is a generic type parameter that should be specified when using the resource.',
+        description:
+          'The type of the resource items being managed. This is a generic type parameter that should be specified when using the resource.',
       },
       {
         name: 'ID',
         type: 'Type',
-        description: 'The type of the ID field for the resource items. This is typically a string or number.',
+        description:
+          'The type of the ID field for the resource items. This is typically a string or number.',
       },
       {
         name: 'E',
         type: 'Type',
-        description: 'The type of error that can be returned by the API. This is a generic type parameter that can be specified when using the resource.',
+        description:
+          'The type of error that can be returned by the API. This is a generic type parameter that can be specified when using the resource.',
       },
     ],
     interfaces: [

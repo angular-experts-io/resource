@@ -15,7 +15,7 @@ import { Todo } from '../../model/todo.model';
   template: `
     <div
       [class.pointer-events-none]="disabled()"
-      class="card items-center justify-between cursor-pointer"
+      class="card cursor-pointer items-center justify-between"
       (click)="toggle.emit(t)"
     >
       @let t = todo();

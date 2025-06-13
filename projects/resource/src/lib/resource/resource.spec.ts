@@ -1009,6 +1009,7 @@ describe('Rest Resource', () => {
         await tick(20); // wait for delete to finish
         await tick(); // wait for refresh to finish
 
+        expect(mockDelete).toHaveBeenCalledTimes(2);
         expect(mockGet).toHaveBeenCalledTimes(2);
 
         expect(resource.hasValues()).toBe(false);
@@ -1037,6 +1038,7 @@ describe('Rest Resource', () => {
         await tick(20); // wait for delete to finish
         await tick(); // wait for refresh to finish
 
+        expect(mockDelete).toHaveBeenCalledTimes(2);
         expect(mockGet).toHaveBeenCalledTimes(2);
 
         expect(resource.hasValues()).toBe(true);

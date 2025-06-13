@@ -6,6 +6,7 @@ import {
   inject,
   linkedSignal,
   signal,
+  DOCUMENT,
 } from '@angular/core';
 
 import {
@@ -24,7 +25,6 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { fromEvent, map, of, startWith } from 'rxjs';
 import { MatListItem, MatNavList } from '@angular/material/list';
-import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'showcase-main-layout',

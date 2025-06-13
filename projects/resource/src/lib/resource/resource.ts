@@ -18,7 +18,7 @@ import {
 import { behaviorToOperator, streamify } from './resource.util';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function restResource<T, ID, E = any>(
+export function restResource<T, ID, E extends Error>(
   apiEndpoint: string,
   options: RestResourceOptions<T, ID> = {},
 ) {
@@ -43,7 +43,13 @@ export function restResource<T, ID, E = any>(
   });
 
   const values = linkedSignal({
-    source: resource.value,
+    source: () => {
+      try {
+        return resource.value();
+      } catch {
+        return undefined;
+      }
+    },
     computation: (
       source: T[] | undefined,
       previous: { source: T[] | undefined; value: T[] | undefined } | undefined,
@@ -224,7 +230,7 @@ export function restResource<T, ID, E = any>(
                   const removedItemId =
                     typeof removedItemOrId === 'object'
                       ? getItemId(removedItemOrId as T, options)
-                      : removedItemOrId as ID;
+                      : (removedItemOrId as ID);
                   resource.update((prev) =>
                     prev?.filter(
                       (prevItem) =>
