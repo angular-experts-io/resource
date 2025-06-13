@@ -18,7 +18,7 @@ import {
 import { behaviorToOperator, streamify } from './resource.util';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function restResource<T, ID, E extends Error>(
+export function restResource<T, ID, E extends Error = Error>(
   apiEndpoint: string,
   options: RestResourceOptions<T, ID> = {},
 ) {
@@ -34,10 +34,10 @@ export function restResource<T, ID, E extends Error>(
   const errorRemove = signal<E | undefined>(undefined);
 
   const resource = rxResource({
-    request: () => options.params?.() ?? '',
-    loader: ({ request }) => {
-      const fullUrl = `${apiEndpoint}${request}`;
-      verbose('Read (Angular resource)', { request, fullUrl });
+    params: () => options.params?.() ?? '',
+    stream: ({ params }) => {
+      const fullUrl = `${apiEndpoint}${params}`;
+      verbose('Read (Angular resource)', { params, fullUrl });
       return http.get<T[]>(fullUrl);
     },
   });

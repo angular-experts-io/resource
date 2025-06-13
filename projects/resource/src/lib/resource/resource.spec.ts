@@ -1108,7 +1108,7 @@ describe('Rest Resource', () => {
       expect(consoleDebugSpy).toHaveBeenCalledWith(
         '[@angular-experts/resource]',
         'Read (Angular resource)',
-        { fullUrl: 'some/api', request: '' },
+        { fullUrl: 'some/api', params: '' },
       );
     });
 
