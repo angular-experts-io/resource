@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core'; // Removed inject
-
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { MatFormField, MatInput } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { restResource } from '@angular-experts/resource'; // Added back
+import { restResource } from '@angular-experts/resource';
+
 import { Todo } from '../../../model/todo.model';
 import { TodoItemComponent } from '../../../ui/todo-item/todo-item.component';
 import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.component';
@@ -13,15 +13,23 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
   imports: [
     MatInput,
     MatFormField,
+    MatProgressSpinnerModule,
     TodoItemComponent,
     TodoSkeletonComponent,
-    MatProgressSpinnerModule,
   ],
   template: `
     <h2>Basic</h2>
     <div class="mt-8 flex flex-col gap-8">
       <div class="flex flex-col gap-4">
-        <h3>Todo list</h3>
+        <div class="flex items-center justify-between">
+          <h3>Todo list</h3>
+          @if (todos.loading()) {
+            <mat-progress-spinner
+              diameter="32"
+              mode="indeterminate"
+            ></mat-progress-spinner>
+          }
+        </div>
 
         <mat-form-field appearance="outline">
           <input
@@ -36,18 +44,6 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
         </mat-form-field>
 
         <div class="relative flex flex-col gap-4">
-          <!-- Spinner for non-initial loads -->
-          @if (todos.loading() && !todos.loadingInitial()) {
-            <div
-              class="bg-opacity-50 absolute inset-0 z-10 flex items-center justify-center bg-white"
-            >
-              <mat-progress-spinner
-                diameter="24"
-                mode="indeterminate"
-              ></mat-progress-spinner>
-            </div>
-          }
-
           @if (todos.loadingInitial()) {
             <showcase-todo-skeleton [repeat]="4" />
           } @else {
@@ -76,27 +72,22 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicComponent {
-  todos = restResource<Todo, string>('todos', {
-    // Added back local restResource
-    create: {
-      strategy: 'incremental',
-    },
-  });
+  todos = restResource<Todo, string>('todos');
   newTodo = signal('');
 
   createTodo() {
     const newTodoValue = this.newTodo();
     if (newTodoValue.length > 0) {
-      this.todos.create({ description: newTodoValue, completed: false }); // Changed to todos.create
+      this.todos.create({ description: newTodoValue, completed: false });
     }
     this.newTodo.set('');
   }
 
   handleToggle(todo: Todo) {
-    this.todos.update({ ...todo, completed: !todo.completed }); // Changed to todos.update
+    this.todos.update({ ...todo, completed: !todo.completed });
   }
 
   handleRemove(todo: Todo) {
-    this.todos.remove(todo); // Changed to todos.remove
+    this.todos.remove(todo);
   }
 }
