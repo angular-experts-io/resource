@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  signal
+} from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormField, MatInput } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -13,6 +19,8 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
   imports: [
     MatInput,
     MatFormField,
+    MatIconModule,
+    MatButtonModule,
     MatProgressSpinnerModule,
     TodoItemComponent,
     TodoSkeletonComponent,
@@ -31,21 +39,36 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
           }
         </div>
 
-        <mat-form-field appearance="outline">
-          <input
-            #todoDescriptionInputRef
-            matInput
-            placeholder="What am I going to do..."
-            [value]="newTodo()"
-            (input)="newTodo.set(todoDescriptionInputRef.value)"
-            (keyup.enter)="createTodo()"
-            [disabled]="todos.loading()"
-          />
-        </mat-form-field>
+        <div class="flex items-center gap-4">
+          <mat-form-field
+            appearance="outline"
+            class="flex-grow"
+            subscriptSizing="dynamic"
+          >
+            <input
+              #todoDescriptionInputRef
+              matInput
+              placeholder="What am I going to do..."
+              [value]="newTodo()"
+              (input)="newTodo.set(todoDescriptionInputRef.value)"
+              (keyup.enter)="createTodo()"
+              [disabled]="todos.loading()"
+            />
+          </mat-form-field>
+          <button
+            mat-fab
+            color="primary"
+            aria-label="Add todo"
+            (click)="createTodo()"
+            [disabled]="todos.loading() || newTodo().length === 0"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
 
         <div class="relative flex flex-col gap-4">
-          @if (todos.loadingInitial()) {
             <showcase-todo-skeleton [repeat]="4" />
+          @if (todos.loadingInitial()) {
           } @else {
             @for (todo of todos.values(); track todo.id) {
               <showcase-todo-item
