@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/angular-experts-io/resource/compare/v0.0.7...v0.1.0) (2025-06-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* update to Angular 20, bump peer deps version range
+
+### Features
+
+* update Angular dependencies to version 20 and refactor components for improved structure and styling ([d0d548b](https://github.com/angular-experts-io/resource/commit/d0d548b7e8f04c0ad413268e075eb120bae8ce1b))
+
 ### [0.0.7](https://github.com/angular-experts-io/resource/compare/v0.0.6...v0.0.7) (2025-05-29)
 
 
