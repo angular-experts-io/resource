@@ -67,8 +67,8 @@ import { TodoSkeletonComponent } from '../../../ui/todo-skeleton/todo-skeleton.c
         </div>
 
         <div class="relative flex flex-col gap-4">
-            <showcase-todo-skeleton [repeat]="4" />
           @if (todos.loadingInitial()) {
+            <showcase-todo-skeleton [repeat]="4" />
           } @else {
             @for (todo of todos.values(); track todo.id) {
               <showcase-todo-item
