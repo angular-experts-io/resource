@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/angular-experts-io/resource/compare/v0.1.1...v0.1.2) (2025-06-13)
+
+
+### Features
+
+* enhance todo component with improved input handling and skeleton loading UI ([e3fea3e](https://github.com/angular-experts-io/resource/commit/e3fea3e9c181d8995820743a843e402c4631ca37))
+* implement todo backend mock service and update api interceptor ([d03331f](https://github.com/angular-experts-io/resource/commit/d03331fd1b23622c4bf38ae7b8ce0c8c6b9e5dba))
+* update todo skeleton display logic for improved loading experience ([25125d7](https://github.com/angular-experts-io/resource/commit/25125d793d2f77f6cc25e8b01f6b7ecef0850a7b))
+
 ### [0.1.1](https://github.com/angular-experts-io/resource/compare/v0.1.0...v0.1.1) (2025-06-13)
 
 ## [0.1.0](https://github.com/angular-experts-io/resource/compare/v0.0.7...v0.1.0) (2025-06-13)
