@@ -1,4 +1,4 @@
-import { inject, isDevMode } from '@angular/core';
+import { inject } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { delay } from 'rxjs';
 
@@ -12,12 +12,9 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     req = req.clone({
       url: `https://681db05cf74de1d219b09e9c.mockapi.io/api/v1/` + req.url,
     });
-    if (false) {
-      // hit real server in dev mode
-      return next(req);
-    } else {
-      // hit mock todo server in prod mode so every visitor gets their own todo data
-      return todoBackendMock.handleRequest(req).pipe(delay(250));
-    }
+    // real server
+    // return next(req);
+    // hit mock todo server in prod mode so every visitor gets their own todo data
+    return todoBackendMock.handleRequest(req).pipe(delay(250));
   }
 };
